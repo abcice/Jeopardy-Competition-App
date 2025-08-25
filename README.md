@@ -1,5 +1,5 @@
 # 🎯 Jeopardy Competition App
-
+[wireframe](https://excalidraw.com/#json=8P05yYj6QJSbCXiCcbAPe,eQhRQan-bNK70FBB4pwwlg)
 ## 📖 Description
 This is a **Jeopardy-style multiplayer competition app** designed for classrooms, clubs, or events. Instructors can create and manage competitions with categories, questions, scores, and special rules like **Daily Doubles**.  
 
