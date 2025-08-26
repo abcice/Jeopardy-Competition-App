@@ -1,5 +1,5 @@
 import express from 'express';
-import * as CompetitionController from '../controllers/api/competition';
+import * as CompetitionController from '../../controllers/api/competition';
 
 const router = express.Router();
 
