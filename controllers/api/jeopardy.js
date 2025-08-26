@@ -1,4 +1,4 @@
-import Jeopardy from '../../models/Jeopardy';
+import Jeopardy from '../../models/Jeopardy.js';
 
 // List all Jeopardy games
 export async function index(req, res) {

@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const questionSchema = new mongoose.Schema({
   text: { type: String, required: true },
@@ -17,4 +17,4 @@ const jeopardySchema = new mongoose.Schema({
   author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 }, { timestamps: true });
 
-module.exports = mongoose.model("Jeopardy", jeopardySchema);
+export default mongoose.model("Jeopardy", jeopardySchema);

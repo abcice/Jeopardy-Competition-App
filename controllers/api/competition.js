@@ -1,6 +1,6 @@
-import Competition from '../../models/Competition';
-import Jeopardy from '../../models/Jeopardy';
-import Buzz from '../../models/Buzz';
+import Competition from '../../models/Competition.js';
+import Jeopardy from '../../models/Jeopardy.js';
+import Buzz from '../../models/Buzz.js';
 // List all competitions
 
 

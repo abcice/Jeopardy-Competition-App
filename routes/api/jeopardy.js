@@ -1,5 +1,5 @@
 import express from 'express';
-import * as JeopardyController from '../../controllers/api/jeopardy';
+import * as JeopardyController from '../../controllers/api/jeopardy.js';
 
 const router = express.Router();
 
