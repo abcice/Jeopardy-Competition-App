@@ -64,6 +64,22 @@ export async function showCategories(req, res) {
     res.status(400).json({ msg: e.message });
   }
 }
+// Show a single category
+export async function showCategory(req, res) {
+  try {
+    const { id, categoryId } = req.params;
+    const jeopardy = await Jeopardy.findById(id).populate('author');
+    if (!jeopardy) return res.status(404).json({ msg: "Jeopardy not found" });
+
+    const category = jeopardy.categories.id(categoryId);
+    if (!category) return res.status(404).json({ msg: "Category not found" });
+
+    res.status(200).json(category);
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
+}
+
 
 
 
@@ -109,17 +125,18 @@ export async function updateCategory(req, res) {
 // Delete a category
 export async function deleteCategory(req, res) {
   try {
-    const { categoryId } = req.params; // category ID to delete
+    const { categoryId } = req.params;
     const jeopardy = await Jeopardy.findById(req.params.id);
     if (!jeopardy) return res.status(404).json({ msg: "Jeopardy not found" });
 
     const category = jeopardy.categories.id(categoryId);
     if (!category) return res.status(404).json({ msg: "Category not found" });
 
-    // Remove the category
-    category.remove();
+    // ✅ remove the category manually
+    jeopardy.categories = jeopardy.categories.filter(
+      (cat) => cat._id.toString() !== categoryId
+    );
 
-    // Save the document
     await jeopardy.save();
 
     res.status(200).json({ msg: "Category deleted successfully", jeopardy });
@@ -128,35 +145,40 @@ export async function deleteCategory(req, res) {
   }
 }
 
+
 //Adding a question to a category
 export async function addQuestion(req, res) {
   try {
-    const jeopardy = await Jeopardy.findById(req.params.id);
+    const { id, categoryId } = req.params; // ✅ take from URL
+    const { text, points, dailyDouble } = req.body;
+
+    const jeopardy = await Jeopardy.findById(id);
     if (!jeopardy) return res.status(404).json({ msg: "Jeopardy not found" });
 
-    const category = jeopardy.categories.id(req.body.categoryId);
+    const category = jeopardy.categories.id(categoryId);
     if (!category) return res.status(404).json({ msg: "Category not found" });
 
     category.questions.push({
-      text: req.body.text,
-      points: req.body.points,
-      dailyDouble: req.body.dailyDouble || false
+      text,
+      points,
+      dailyDouble: dailyDouble || false
     });
 
     await jeopardy.save();
-    res.status(200).json(jeopardy);
+    res.status(201).json(category.questions);
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }
 }
 
+
 // Update a question
 export async function updateQuestion(req, res) {
   try {
-    const { questionId } = req.params;
-    const { categoryId, text, points, dailyDouble } = req.body;
+    const { id, categoryId, questionId } = req.params;
+    const { text, points, dailyDouble } = req.body;
 
-    const jeopardy = await Jeopardy.findById(req.params.id);
+    const jeopardy = await Jeopardy.findById(id);
     if (!jeopardy) return res.status(404).json({ msg: "Jeopardy not found" });
 
     const category = jeopardy.categories.id(categoryId);
@@ -165,18 +187,19 @@ export async function updateQuestion(req, res) {
     const question = category.questions.id(questionId);
     if (!question) return res.status(404).json({ msg: "Question not found" });
 
-    // Update the question fields
+    // Update only the fields provided
     if (text !== undefined) question.text = text;
     if (points !== undefined) question.points = points;
     if (dailyDouble !== undefined) question.dailyDouble = dailyDouble;
 
     await jeopardy.save();
 
-    res.status(200).json({ msg: "Question updated successfully", jeopardy });
+    res.status(200).json({ msg: "Question updated successfully", question });
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }
 }
+
 
 
 // Show all questions for a specific category
@@ -203,7 +226,7 @@ export async function showQuestions(req, res) {
 // Delete a question
 export async function deleteQuestion(req, res) {
   try {
-    const { id, categoryId, questionId } = req.params; // id = Jeopardy id
+    const { id, categoryId, questionId } = req.params;
 
     const jeopardy = await Jeopardy.findById(id);
     if (!jeopardy) return res.status(404).json({ msg: "Jeopardy not found" });
@@ -214,7 +237,11 @@ export async function deleteQuestion(req, res) {
     const question = category.questions.id(questionId);
     if (!question) return res.status(404).json({ msg: "Question not found" });
 
-    question.remove(); // Remove the question from the category
+    // ✅ remove the question manually
+    category.questions = category.questions.filter(
+      (q) => q._id.toString() !== questionId
+    );
+
     await jeopardy.save();
 
     res.status(200).json({ msg: "Question deleted successfully", jeopardy });

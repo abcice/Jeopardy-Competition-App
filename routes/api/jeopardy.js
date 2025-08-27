@@ -15,6 +15,9 @@ router.get('/:id/categories', JeopardyController.showCategories);   // List all 
 router.post('/:id/categories', JeopardyController.addCategory);     // Add a category
 router.put('/:id/categories/:categoryId', JeopardyController.updateCategory); // Update category
 router.delete('/:id/categories/:categoryId', JeopardyController.deleteCategory); // Delete category
+// Get a single category
+router.get('/:id/categories/:categoryId', JeopardyController.showCategory);
+
 
 // Questions
 router.get('/:id/categories/:categoryId/questions', JeopardyController.showQuestions); // List questions

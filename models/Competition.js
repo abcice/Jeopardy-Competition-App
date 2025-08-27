@@ -12,11 +12,13 @@ const teamSchema = new mongoose.Schema({
 });
 
 const competitionSchema = new mongoose.Schema({
-  jeopardy: { type: mongoose.Schema.Types.ObjectId, ref: "Jeopardy" },
+  // Reference to the Jeopardy document
+  jeopardy: { type: mongoose.Schema.Types.ObjectId, ref: "Jeopardy", required: true },
   teams: [teamSchema],
   status: { type: String, enum: ["pending", "running", "finished"], default: "pending" },
-  currentQuestion: { type: mongoose.Schema.Types.ObjectId, ref: "Question" },
-  round: { type: Number, default: 1 },
+  // Current question ObjectId inside the Jeopardy document
+  currentQuestion: { type: mongoose.Schema.Types.ObjectId, default: null },
+    round: { type: Number, default: 1 },
 }, { timestamps: true });
 
 export default mongoose.model("Competition", competitionSchema);

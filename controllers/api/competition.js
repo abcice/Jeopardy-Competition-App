@@ -7,25 +7,51 @@ import Buzz from '../../models/Buzz.js';
 export async function index(req, res) {
     try {
         const competitions = await Competition.find({}).populate('jeopardy').exec();
-        res.status(200).json(competitions)
-    } catch (e) {
-         res.status(400).json({ msg: e.message });
+    // Include currentQuestion details for each competition
+    const competitionsWithCurrent = competitions.map((comp) => {
+      let currentQuestionDetails = null;
+      if (comp.currentQuestion) {
+        for (const category of comp.jeopardy.categories) {
+          const q = category.questions.id(comp.currentQuestion);
+          if (q) {
+            currentQuestionDetails = q;
+            break;
+          }
+        }
+      }
+      return {
+        ...comp.toObject(),
+        currentQuestionDetails,
+      };
+    });
 
-    }
-    
+    res.status(200).json(competitionsWithCurrent);
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
 }
 // Show one competition
-
 export async function show(req, res) {
-    try {
-        const competition = await Competition.findById(req.params.id)
-        .populate('jeopardy').exec();
-        res.status(200).json(competition)
+  try {
+    const competition = await Competition.findById(req.params.id).populate('jeopardy').exec();
+    if (!competition) return res.status(404).json({ msg: "Competition not found" });
 
-    } catch (e) {
-         res.status(400).json({ msg: e.message });
-
+    // Extract current question details from Jeopardy
+    let currentQuestionDetails = null;
+    if (competition.currentQuestion) {
+      for (const category of competition.jeopardy.categories) {
+        const q = category.questions.id(competition.currentQuestion);
+        if (q) {
+          currentQuestionDetails = q;
+          break;
+        }
+      }
     }
+
+    res.status(200).json({ competition, currentQuestionDetails });
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
 }
 // Create a new competition
 
