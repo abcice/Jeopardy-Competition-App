@@ -18,6 +18,7 @@ const competitionSchema = new mongoose.Schema({
   status: { type: String, enum: ["pending", "running", "finished"], default: "pending" },
   // Current question ObjectId inside the Jeopardy document
   currentQuestion: { type: mongoose.Schema.Types.ObjectId, default: null },
+    answeredQuestions: [{ type: mongoose.Schema.Types.ObjectId }], // ✅ new
     round: { type: Number, default: 1 },
 }, { timestamps: true });
 

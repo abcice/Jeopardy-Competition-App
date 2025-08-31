@@ -6,6 +6,8 @@ import BackButton from "../../../components/BackButton/BackButton";
 import SaveButton from "../../../components/SaveButton/SaveButton";
 import * as jeopardyApi from "../../../utilities/jeopardy";
 import styles from "./EditCompetition.module.css";
+import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
+
 
 export default function EditCompetition() {
   const { jeopardyId } = useParams();
@@ -235,11 +237,23 @@ export default function EditCompetition() {
                   value={q.text}
                   onChange={(e) => handleQuestionChange(index, "text", e.target.value)}
                 />
+                {/* ✅ Live Preview */}
+                <div className={styles.preview}>
+                  <strong>Preview:</strong>
+                  <MarkdownRenderer content={q.text} />
+                </div>
+
                 <label>Answer</label>
                 <textarea
                   value={q.answer}
                   onChange={(e) => handleQuestionChange(index, "answer", e.target.value)}
                 />
+                 {/* ✅ Live Preview */}
+                <div className={styles.preview}>
+                  <strong>Preview:</strong>
+                  <MarkdownRenderer content={q.answer} />
+                </div>
+                
                 <label>Score</label>
                 <input
                   type="number"

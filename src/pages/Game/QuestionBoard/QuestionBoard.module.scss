@@ -1,0 +1,32 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cell {
+  width: 100px;
+  height: 80px;
+  font-size: 1.2rem;
+  background: #0044cc;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #0066ff;
+  }
+}
+
+.answered {
+  background: #666 !important;
+  color: #ccc;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.empty {
+  display: block;
+  width: 100px;
+  height: 80px;
+}

@@ -1,0 +1,91 @@
+.ranking-page {
+  padding: 2rem;
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  transition: all 0.3s ease;
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+
+  .teamList {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 400px;
+
+    .teamItem {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1rem;
+      margin: 0.5rem 0;
+      background: #f0f0f0;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+
+      .rank {
+        font-weight: bold;
+        width: 2rem;
+      }
+
+      .name {
+        flex: 1;
+        text-align: left;
+        padding-left: 1rem;
+      }
+
+      .score {
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+/* Game finished styling */
+.finished {
+  background: radial-gradient(circle, #ffeb3b, #f44336);
+  color: #fff;
+  animation: pulse 1s infinite alternate;
+
+  h2 {
+    color: #fff;
+  }
+
+  .teamList {
+    .teamItem {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .winnerGlow {
+      background: rgba(255, 255, 255, 0.4);
+      border: 2px solid #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 20px 5px gold;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+  }
+
+  .winner {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    color: gold;
+    text-shadow: 1px 1px 5px #000;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 10px 0 rgba(255, 255, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 25px 10px rgba(255, 255, 0, 0.8);
+  }
+}

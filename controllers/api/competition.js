@@ -198,6 +198,7 @@ export async function markCorrect(req, res) {
     }
 
     // Mark question as answered (clear currentQuestion)
+    competition.answeredQuestions.push(question._id);
     competition.currentQuestion = null;
 
     await competition.save();
@@ -278,6 +279,7 @@ export async function skipQuestion(req, res) {
     }
 
     // Clear current question (mark as used/skipped)
+    competition.answeredQuestions.push(competition.currentQuestion);
     competition.currentQuestion = null;
 
     await competition.save();

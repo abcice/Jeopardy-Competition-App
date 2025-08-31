@@ -6,19 +6,18 @@ import BackButton from "../../../components/BackButton/BackButton";
 import SaveButton from "../../../components/SaveButton/SaveButton";
 import * as jeopardyApi from "../../../utilities/jeopardy";
 import styles from "./CreateQuestion.module.scss";
-
+import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
 export default function CreateQuestion() {
   const navigate = useNavigate();
   const { jeopardyId } = useParams();
   const location = useLocation();
 
-  // ✅ Grab data passed from CreateGame
   const { totalCategories = 0, questionsPerCategory = 0 } = location.state || {};
-
   if (!totalCategories || !questionsPerCategory) {
     navigate("/create-game");
     return null;
   }
+
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [categoryName, setCategoryName] = useState("");
   const [questions, setQuestions] = useState(
@@ -31,7 +30,6 @@ export default function CreateQuestion() {
   );
   const [message, setMessage] = useState("");
 
-  // Update question input
   const handleQuestionChange = (index, field, value) => {
     const updated = [...questions];
     updated[index][field] = value;
@@ -40,10 +38,7 @@ export default function CreateQuestion() {
 
   const handleSaveCategory = async () => {
     try {
-      // 1. Add category
       const category = await jeopardyApi.addCategory(jeopardyId, categoryName);
-
-      // 2. Add all questions under this category
       for (const q of questions) {
         await jeopardyApi.addQuestion(jeopardyId, category._id, {
           text: q.text,
@@ -52,8 +47,6 @@ export default function CreateQuestion() {
           dailyDouble: q.dailyDouble,
         });
       }
-
-      // Reset for next category
       if (currentCategoryIndex + 1 < totalCategories) {
         setCurrentCategoryIndex((prev) => prev + 1);
         setCategoryName("");
@@ -97,6 +90,7 @@ export default function CreateQuestion() {
             {questions.map((q, index) => (
               <div key={index} className={styles.questionBlock}>
                 <h3>Question {index + 1}</h3>
+
                 <label>Text</label>
                 <textarea
                   value={q.text}
@@ -104,6 +98,12 @@ export default function CreateQuestion() {
                     handleQuestionChange(index, "text", e.target.value)
                   }
                 />
+                {/* ✅ Live Preview for Question */}
+                <div className={styles.preview}>
+                  <strong>Preview:</strong>
+                  <MarkdownRenderer content={q.text} />
+                </div>
+
                 <label>Answer</label>
                 <textarea
                   value={q.answer}
@@ -111,6 +111,12 @@ export default function CreateQuestion() {
                     handleQuestionChange(index, "answer", e.target.value)
                   }
                 />
+                {/* ✅ Live Preview for Answer */}
+                <div className={styles.preview}>
+                  <strong>Preview:</strong>
+                  <MarkdownRenderer content={q.answer} />
+                </div>
+
                 <label>Score</label>
                 <input
                   type="number"
@@ -119,6 +125,7 @@ export default function CreateQuestion() {
                     handleQuestionChange(index, "score", e.target.value)
                   }
                 />
+
                 <label>
                   Daily Double
                   <input

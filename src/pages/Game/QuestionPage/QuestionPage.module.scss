@@ -1,0 +1,146 @@
+.question-page {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  transition: all 0.3s ease;
+
+  &.dailyDoubleActive {
+    background: radial-gradient(circle, #ffeb3b, #f44336);
+    color: #fff;
+    filter: blur(0);
+    animation: pulse 1s infinite alternate;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .questionText {
+    font-size: 1.5rem;
+    margin: 1rem 0;
+    text-align: center;
+    padding: 1rem;
+    border: 2px solid #333;
+    border-radius: 12px;
+    background: #f0f0f0;
+    transition: all 0.3s ease;
+
+    &.dailyDouble {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-weight: 700;
+      text-shadow: 1px 1px 2px #000;
+      border-color: #fff;
+      transform: scale(1.05);
+    }
+  }
+
+  .answer {
+    font-size: 1.3rem;
+    margin-top: 1rem;
+    font-weight: 600;
+    text-align: center;
+    color: #4caf50;
+  }
+
+  .teamAnswering {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+    text-align: center;
+    font-weight: bold;
+    color: #2196f3;
+  }
+
+  .waiting {
+    font-size: 1.1rem;
+    text-align: center;
+    font-style: italic;
+    color: #888;
+  }
+
+  .message {
+    font-size: 1rem;
+    color: #ff5722;
+    text-align: center;
+    margin: 1rem 0;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+
+    button {
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      &:not(:disabled):hover {
+        transform: scale(1.05);
+      }
+
+      &:first-child {
+        background: #4caf50;
+        color: #fff;
+      }
+
+      &:nth-child(2) {
+        background: #f44336;
+        color: #fff;
+      }
+
+      &:last-child {
+        background: #ff9800;
+        color: #fff;
+      }
+    }
+  }
+
+  h3 {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 1.5rem;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+
+    li {
+      margin: 0.5rem 0;
+      font-size: 1.2rem;
+    }
+  }
+}
+
+/* Daily Double pulse animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 10px 0 rgba(255, 0, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 25px 10px rgba(255, 0, 0, 0.8);
+  }
+}
+
+/* Optional blur/dim background when overlay is active */
+.dimmedBackground {
+  filter: blur(3px) brightness(0.6);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
