@@ -150,7 +150,7 @@ export async function deleteCategory(req, res) {
 export async function addQuestion(req, res) {
   try {
     const { id, categoryId } = req.params; // ✅ take from URL
-    const { text, points, dailyDouble } = req.body;
+    const { text, answer, points, dailyDouble } = req.body;
 
     const jeopardy = await Jeopardy.findById(id);
     if (!jeopardy) return res.status(404).json({ msg: "Jeopardy not found" });
@@ -160,6 +160,7 @@ export async function addQuestion(req, res) {
 
     category.questions.push({
       text,
+      answer,
       points,
       dailyDouble: dailyDouble || false
     });
@@ -176,7 +177,7 @@ export async function addQuestion(req, res) {
 export async function updateQuestion(req, res) {
   try {
     const { id, categoryId, questionId } = req.params;
-    const { text, points, dailyDouble } = req.body;
+    const { text, answer, points, dailyDouble } = req.body;
 
     const jeopardy = await Jeopardy.findById(id);
     if (!jeopardy) return res.status(404).json({ msg: "Jeopardy not found" });
@@ -189,6 +190,7 @@ export async function updateQuestion(req, res) {
 
     // Update only the fields provided
     if (text !== undefined) question.text = text;
+    if (answer !== undefined) question.answer = answer;
     if (points !== undefined) question.points = points;
     if (dailyDouble !== undefined) question.dailyDouble = dailyDouble;
 
