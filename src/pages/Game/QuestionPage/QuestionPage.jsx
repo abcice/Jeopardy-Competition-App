@@ -7,6 +7,7 @@ import styles from "./QuestionPage.module.scss";
 import DailyDouble from "./DailyDouble/DailyDouble";
 import RankingContent from "../RankingPage/RankingContent";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
+import BuzzButton from "../../../components/BuzzButton/BuzzButton";
 
 
 export default function QuestionPage() {
@@ -154,6 +155,20 @@ if (updatedCompetition) {
 
         {message && <p className={styles.message}>{message}</p>}
         
+        <div className={styles.buzzersContainer}>
+          {competition.teams.map((team) => (
+            <BuzzButton
+              key={team._id}
+              team={team}
+              identifierType={competition.identifierType || "colors"}
+              onBuzz={(team) => setTeamAnswering(team)}
+              disabled={!!teamAnswering && teamAnswering._id !== team._id}
+            />
+          ))}
+        </div>
+
+
+
 
         {/* Instructor-only controls */}
         <div className={styles.controls}>

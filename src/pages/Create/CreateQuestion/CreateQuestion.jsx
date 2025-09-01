@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
@@ -11,6 +11,8 @@ export default function CreateQuestion() {
   const navigate = useNavigate();
   const { jeopardyId } = useParams();
   const location = useLocation();
+  const importedQuestion = location.state?.importedQuestion;
+
 
   const { totalCategories = 0, questionsPerCategory = 0 } = location.state || {};
   if (!totalCategories || !questionsPerCategory) {
@@ -21,14 +23,29 @@ export default function CreateQuestion() {
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [categoryName, setCategoryName] = useState("");
   const [questions, setQuestions] = useState(
-    Array.from({ length: questionsPerCategory }, () => ({
-      text: "",
-      answer: "",
-      score: "",
-      dailyDouble: false,
+    Array.from({ length: questionsPerCategory }, (_, i) => ({
+      text: importedQuestion && i === 0 ? importedQuestion.text : "",
+      answer: importedQuestion && i === 0 ? importedQuestion.answer : "",
+      score: importedQuestion && i === 0 ? importedQuestion.score : "",
+      dailyDouble: importedQuestion && i === 0 ? importedQuestion.dailyDouble : false,
     }))
   );
   const [message, setMessage] = useState("");
+  useEffect(() => {
+  if (importedQuestion) {
+    setQuestions(prev => prev.map((q, i) =>
+      i === 0
+        ? {
+            text: importedQuestion.text,
+            answer: importedQuestion.answer,
+            score: importedQuestion.score,
+            dailyDouble: importedQuestion.dailyDouble,
+          }
+        : q
+    ));
+  }
+}, [importedQuestion]);
+
 
   const handleQuestionChange = (index, field, value) => {
     const updated = [...questions];
@@ -86,6 +103,18 @@ export default function CreateQuestion() {
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
             />
+            <button
+              type="button"
+              className={styles.importButton}
+              onClick={() =>
+                navigate(`/jeopardy/${jeopardyId}/import-question`, {
+                  state: { currentCategoryIndex, questionsPerCategory }
+                })
+              }
+            >
+              📥 Import from Old Jeopardies
+            </button>
+
 
             {questions.map((q, index) => (
               <div key={index} className={styles.questionBlock}>

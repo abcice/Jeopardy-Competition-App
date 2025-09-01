@@ -1,0 +1,10 @@
+.gamePage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  main {
+    flex: 1; // pushes footer to the bottom
+    padding: 2rem;
+  }
+}
