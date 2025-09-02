@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import * as competitionApi from "../../../utilities/competition-api";
-import styles from "./QuestionBoard.module.css";
+import styles from "./QuestionBoard.module.scss";
 import RankingContent from "../RankingPage/RankingContent";
 
 

@@ -1,9 +1,9 @@
 // src/pages/Competition/GamePage/GamePage.jsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Navbar from '../../components/Navbar/Navbar';
-import Footer from '../../components/Footer/Footer';
-import * as competitionApi from '../../utilities/competition-api';
+import Navbar from '../../../components/Navbar/Navbar';
+import Footer from '../../../components/Footer/Footer';
+import * as competitionApi from '../../../utilities/competition-api';
 import styles from './GamePage.module.scss';
 
 export default function GamePage() {

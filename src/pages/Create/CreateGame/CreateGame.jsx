@@ -4,7 +4,7 @@ import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import BackButton from "../../../components/BackButton/BackButton";
 import SaveButton from "../../../components/SaveButton/SaveButton";
-import * as jeopardyApi from "../../../utilities/jeopardy";
+import * as jeopardyApi from "../../../utilities/jeopardy-api";
 import * as competitionApi from "../../../utilities/competition-api";
 import { getUser } from "../../../utilities/users-service";
 import styles from "./CreateGame.module.scss";
@@ -45,12 +45,14 @@ export default function CreateGame() {
       await competitionApi.create(jeopardy._id);
 
       // ✅ Redirect to CreateQuestion page
-      navigate(`/create-questions/${jeopardy._id}`, {
+      // Correct path based on your routes
+      navigate(`/jeopardy/${jeopardy._id}/create-question`, {
         state: {
           totalCategories: Number(formData.categories),
           questionsPerCategory: Number(formData.questions),
         },
       });
+
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to create competition.");
@@ -91,7 +93,7 @@ export default function CreateGame() {
 
         <div className={styles.actions}>
           <BackButton />
-          <SaveButton onClick={handleSave} disabled={loading} />
+          <SaveButton onSave={handleSave} disabled={loading} />
         </div>
 
         {message && <p>{message}</p>}

@@ -7,7 +7,7 @@ import styles from "./SaveButton.module.scss";
  * @param {string} to - route to navigate to after saving
  * @param {function} onSave - async function to run before navigation (e.g. call API)
  */
-export default function SaveButton({ to, onSave }) {
+export default function SaveButton({ to, onSave, disabled = false }) {
   const navigate = useNavigate();
 
   const handleClick = async () => {
@@ -25,8 +25,9 @@ export default function SaveButton({ to, onSave }) {
   };
 
   return (
-    <button className={styles["save-button"]} onClick={handleClick}>
-      Save
-    </button>
+          <button className={styles["save-button"]} onClick={handleClick} disabled={disabled}>
+            {disabled ? "Saving..." : "Save"}
+          </button>
+
   );
 }

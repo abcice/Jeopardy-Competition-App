@@ -1,0 +1,61 @@
+.gamePage {
+  max-width: 700px;
+  margin: 2em auto;
+  padding: 2em;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+  }
+
+  h1, h2 {
+    text-align: center;
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+
+    input, select {
+      width: 100%;
+    }
+
+    button {
+      background-color: #007bff;
+      color: #fff;
+      padding: 0.5em;
+      border-radius: 6px;
+      font-size: 1rem;
+      &:hover {
+        background-color: #0056b3;
+      }
+    }
+  }
+
+  .teamsPreview {
+    ul {
+      list-style: none;
+      padding: 0;
+      li {
+        padding: 0.5em 0;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1em;
+  }
+
+  .message {
+    text-align: center;
+    color: green;
+  }
+}

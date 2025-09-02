@@ -1,15 +1,23 @@
 .AuthPage {
-  height: 100%;
   display: flex;
-  justify-content: space-evenly;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  background-color: var(--white);
-  border-radius: 2vmin;
-}
+  min-height: 80vh;
+  padding: 2em;
 
-.AuthPage h3 {
-  margin-top: 4vmin;
-  text-align: center;
-  color: var(--text-light);
-  cursor: pointer;
+  h3 {
+    cursor: pointer;
+    color: #007bff;
+    margin-bottom: 1em;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  form {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+  }
 }

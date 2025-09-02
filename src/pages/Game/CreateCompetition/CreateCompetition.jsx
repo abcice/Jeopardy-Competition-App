@@ -1,11 +1,11 @@
 import styles from './CreateCompetition.module.scss';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import BackButton from '../../components/BackButton/BackButton';
-import NextButton from '../../components/NextButton/NextButton';
-import Navbar from '../../components/Navbar/Navbar';
-import Footer from '../../components/Footer/Footer';
-import * as competitionApi from '../../utilities/competition-api';
+import BackButton from '../../../components/BackButton/BackButton';
+import NextButton from '../../../components/NextButton/NextButton';
+import Navbar from '../../../components/Navbar/Navbar';
+import Footer from '../../../components/Footer/Footer';
+import * as competitionApi from '../../../utilities/competition-api';
 
 export default function GamePage() {
   const { id: competitionId } = useParams(); // competition id from route

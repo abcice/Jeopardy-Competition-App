@@ -1,13 +1,53 @@
-.preview {
-  margin: 0.5rem 0 1rem;
-  padding: 0.75rem;
-  background: #f9f9f9;
-  border-left: 3px solid #ccc;
-  font-size: 0.9rem;
+.createQuestion {
+  max-width: 700px;
+  margin: 2em auto;
+  padding: 2em;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 
-  strong {
+  h1 {
+    text-align: center;
+  }
+
+  label {
+    font-weight: bold;
+    margin-top: 1em;
     display: block;
-    margin-bottom: 0.25rem;
-    color: #555;
+  }
+
+  .questionBlock {
+    margin: 1em 0;
+    padding: 1em;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fafafa;
+  }
+
+  .preview {
+    margin-top: 0.5em;
+    padding: 0.5em;
+    background: #f0f0f0;
+    border-radius: 6px;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1em;
+  }
+
+  .importButton {
+    background: #007bff;
+    color: #fff;
+    margin-top: 0.5em;
+  }
+
+  .finished {
+    text-align: center;
+
+    button {
+      margin: 0.5em;
+    }
   }
 }

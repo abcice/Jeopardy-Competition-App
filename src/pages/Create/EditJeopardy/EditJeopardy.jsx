@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import BackButton from "../../../components/BackButton/BackButton";
-import * as jeopardyApi from "../../../utilities/jeopardy";
+import * as jeopardyApi from "../../../utilities/jeopardy-api";
 import styles from "./EditJeopardy.module.scss";
 
 export default function EditJeopardy() {

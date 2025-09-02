@@ -1,6 +1,6 @@
 // src/components/Navbar.jsx
 import { useNavigate } from "react-router-dom";
-import { getUser, logOut } from "../utilities/users-service";
+import { getUser, logOut } from "../../utilities/users-service";
 
 export default function Navbar() {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import * as competitionApi from "../../../utilities/competition-api";
-import styles from "./RankingContent.module.scss";
+import styles from "./RankingPage.module.scss";
 
 export default function RankingContent({ competitionId }) {
   const [competition, setCompetition] = useState(null);

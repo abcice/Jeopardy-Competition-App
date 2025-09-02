@@ -4,7 +4,7 @@ import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import BackButton from "../../../components/BackButton/BackButton";
 import SaveButton from "../../../components/SaveButton/SaveButton";
-import * as jeopardyApi from "../../../utilities/jeopardy";
+import * as jeopardyApi from "../../../utilities/jeopardy-api";
 import styles from "./CreateQuestion.module.scss";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
 export default function CreateQuestion() {
@@ -15,10 +15,16 @@ export default function CreateQuestion() {
 
 
   const { totalCategories = 0, questionsPerCategory = 0 } = location.state || {};
+  useEffect(() => {
+    if (!totalCategories || !questionsPerCategory) {
+      navigate("/jeopardy/create"); // navigate inside useEffect
+    }
+  }, [totalCategories, questionsPerCategory, navigate]);
+
   if (!totalCategories || !questionsPerCategory) {
-    navigate("/create-game");
-    return null;
+    return null; // prevent rendering until redirect
   }
+
 
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [categoryName, setCategoryName] = useState("");
@@ -34,7 +40,7 @@ export default function CreateQuestion() {
   useEffect(() => {
   if (importedQuestion) {
     setQuestions(prev => prev.map((q, i) =>
-      i === 0
+      i === importedQuestion.targetQuestionIndex
         ? {
             text: importedQuestion.text,
             answer: importedQuestion.answer,
@@ -165,6 +171,21 @@ export default function CreateQuestion() {
                     }
                   />
                 </label>
+                 <button
+                  type="button"
+                  className={styles.importButton}
+                  onClick={() =>
+                    navigate(`/jeopardy/${jeopardyId}/import-question`, {
+                      state: { 
+                        currentCategoryIndex,
+                        questionsPerCategory,
+                        targetQuestionIndex: index // <-- pass the question index
+                      }
+                    })
+                  }
+                >
+                  📥 Import from Old Jeopardies
+                </button>
               </div>
             ))}
 

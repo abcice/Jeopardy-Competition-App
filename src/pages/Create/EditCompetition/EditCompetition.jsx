@@ -4,8 +4,8 @@ import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import BackButton from "../../../components/BackButton/BackButton";
 import SaveButton from "../../../components/SaveButton/SaveButton";
-import * as jeopardyApi from "../../../utilities/jeopardy";
-import styles from "./EditCompetition.module.css";
+import * as jeopardyApi from "../../../utilities/jeopardy-api";
+import styles from "./EditCompetition.module.scss";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
 
 

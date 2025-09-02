@@ -4,7 +4,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.7);
+  background-color: rgba(0,0,0,0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -12,24 +12,29 @@
 }
 
 .dailyDoubleBox {
-  background: #ff5722;
-  color: white;
+  background-color: #fff;
   padding: 2rem;
-  border-radius: 15px;
+  border-radius: 12px;
   text-align: center;
-  box-shadow: 0 0 20px rgba(255,255,255,0.5);
-}
+  max-width: 400px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
 
-.dailyDoubleBox input {
-  width: 80%;
-  padding: 0.5rem;
-  margin: 1rem 0;
-  font-size: 1.2rem;
-}
+  h2 { color: #f44336; margin-bottom: 1rem; }
 
-.dailyDoubleBox .buttons button {
-  margin: 0 0.5rem;
-  padding: 0.5rem 1rem;
-  font-weight: bold;
-  cursor: pointer;
+  input {
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1rem;
+  }
+
+  .error {
+    color: #e53935;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
 }

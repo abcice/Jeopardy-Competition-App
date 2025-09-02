@@ -1,37 +1,29 @@
 .dashboard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem;
-}
+  text-align: center;
+  margin: 2em auto;
+  max-width: 600px;
 
-.title {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 2rem;
-}
+  .title {
+    font-size: 2rem;
+    margin-bottom: 2em;
+  }
 
-.actions {
-  display: flex;
-  gap: 1.5rem;
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
 
-  button {
-    background-color: #2563eb; // blue
-    color: white;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    button {
+      padding: 0.8em;
+      font-size: 1rem;
+      border-radius: 8px;
+      background-color: #007bff;
+      color: #fff;
+      transition: background 0.2s;
 
-    &:hover {
-      background-color: #1e40af; // darker blue
-      transform: translateY(-2px);
-    }
-
-    &:active {
-      transform: translateY(0);
+      &:hover {
+        background-color: #0056b3;
+      }
     }
   }
 }

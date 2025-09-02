@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
-import * as jeopardyApi from "../../../utilities/jeopardy";
+import * as jeopardyApi from "../../../utilities/jeopardy-api";
 import styles from "./ImportQuestion.module.scss";
 
 export default function ImportQuestion() {
@@ -10,11 +10,32 @@ export default function ImportQuestion() {
   const { jeopardyId } = useParams();
   const location = useLocation();
 
-  const { currentCategoryIndex, questionsPerCategory } = location.state || {};
+const { currentCategoryIndex, questionsPerCategory, targetQuestionIndex } = location.state || {};
+
+useEffect(() => {
+  if (!jeopardyId) {
+    // No game ID: go back to CreateGame
+    navigate("/jeopardy/create");
+    return;
+  }
+
+  // If state missing, go back to CreateQuestion with fallback
   if (currentCategoryIndex == null || questionsPerCategory == null) {
-  navigate(`/create-game`);
-  return null;
-}
+    navigate(`/jeopardy/${jeopardyId}/create-question`, {
+      state: {
+        totalCategories: 1, // fallback, at least 1
+        questionsPerCategory: 1,
+      },
+    });
+  }
+}, [jeopardyId, currentCategoryIndex, questionsPerCategory, navigate]);
+
+
+
+  if (currentCategoryIndex == null || questionsPerCategory == null) {
+    return null; // prevent rendering until redirect
+  }
+
 
   const [oldJeopardies, setOldJeopardies] = useState([]);
   const [selectedJeopardy, setSelectedJeopardy] = useState(null);
@@ -53,19 +74,21 @@ export default function ImportQuestion() {
   }, [selectedCategory]);
 
   const handleImport = () => {
-    if (!selectedQuestion) return;
-    // Navigate back to CreateQuestion with the imported question data
-    navigate(`/jeopardy/${jeopardyId}/create-question`, {
-      state: {
-        currentCategoryIndex,
-        questionsPerCategory,
-        importedQuestion: {
-          ...selectedQuestion,
-          score: selectedQuestion.points, // map points
-        },
+  if (!selectedQuestion) return;
+
+  navigate(`/jeopardy/${jeopardyId}/create-question`, {
+    state: {
+      totalCategories: currentCategoryIndex + 1, // or the actual totalCategories
+      questionsPerCategory,
+      importedQuestion: {
+        ...selectedQuestion,
+        score: selectedQuestion.points,
+        targetQuestionIndex,
       },
-    });
-  };
+    },
+  });
+};
+
 
   return (
     <>
