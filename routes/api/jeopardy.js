@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Jeopardy games
 router.get('/', JeopardyController.index);              // List all games
-router.get('/:id', JeopardyController.showCategories);  // Show Jeopardy details (or categories)
+// router.get('/:id', JeopardyController.showCategories);  // Show Jeopardy details (or categories)
 router.post('/', JeopardyController.create);           // Create new game
 router.put('/:id', JeopardyController.update);         // Update game
 router.delete('/:id', JeopardyController.deleteJeopardy); // Delete game
@@ -17,6 +17,8 @@ router.put('/:id/categories/:categoryId', JeopardyController.updateCategory); //
 router.delete('/:id/categories/:categoryId', JeopardyController.deleteCategory); // Delete category
 // Get a single category
 router.get('/:id/categories/:categoryId', JeopardyController.showCategory);
+router.get('/:id', JeopardyController.showJeopardy); // new controller function
+
 
 
 // Questions

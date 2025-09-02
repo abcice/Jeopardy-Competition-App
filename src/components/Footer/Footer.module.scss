@@ -1,27 +1,22 @@
 .footer {
-  background-color: #1e40af; // deep blue
-  color: #fff;
-  padding: 1rem 0;
-  margin-top: 2rem;
+  background-color: #1f2937; // dark gray
+  color: #f9fafb;
+  padding: 20px 0;
+  font-size: 14px;
 
   .footer-content {
-    max-width: 900px;
+    width: 90%;
+    max-width: 1100px;
     margin: 0 auto;
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-  }
 
-  .about {
-    font-size: 0.9rem;
-    line-height: 1.4;
-    max-width: 600px;
-  }
+    .about {
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
 
-  .copyright {
-    font-size: 0.8rem;
-    color: #d1d5db; // lighter gray
+    .copyright {
+      opacity: 0.7;
+    }
   }
 }

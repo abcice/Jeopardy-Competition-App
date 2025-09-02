@@ -86,16 +86,22 @@ export async function showCategory(req, res) {
 //Adding a category
 export async function addCategory(req, res) {
   try {
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ msg: "Category name is required" });
+    }
+
     const jeopardy = await Jeopardy.findById(req.params.id);
     if (!jeopardy) return res.status(404).json({ msg: "Jeopardy not found" });
 
-    jeopardy.categories.push({ name: req.body.name, questions: [] });
+    jeopardy.categories.push({ name: name.trim(), questions: [] });
     await jeopardy.save();
     res.status(200).json(jeopardy);
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }
 }
+
 
 // Update a category name
 export async function updateCategory(req, res) {
@@ -247,6 +253,18 @@ export async function deleteQuestion(req, res) {
     await jeopardy.save();
 
     res.status(200).json({ msg: "Question deleted successfully", jeopardy });
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
+}
+
+// Show full Jeopardy details (with categories and questions)
+
+export async function showJeopardy(req, res) {
+  try {
+    const jeopardy = await Jeopardy.findById(req.params.id).populate('author');
+    if (!jeopardy) return res.status(404).json({ msg: "Jeopardy not found" });
+    res.status(200).json(jeopardy); // Return full object
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }

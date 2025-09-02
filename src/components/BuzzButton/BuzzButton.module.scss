@@ -1,19 +1,20 @@
-.back-button {
-  background-color: #1e40af; // deep blue
-  color: white;
+.buzzButton {
+  padding: 12px 20px;
   border: none;
-  padding: 0.6rem 1.2rem;
   border-radius: 8px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 
   &:hover {
-    background-color: #1e3a8a; // darker shade
-    transform: translateY(-2px);
+    opacity: 0.9;
+    transform: scale(1.03);
   }
 
-  &:active {
-    transform: translateY(0);
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
   }
 }

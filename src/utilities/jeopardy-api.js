@@ -9,8 +9,9 @@ export function getAll() {
 }
 
 export function getById(id) {
-  return sendRequest(`${BASE_URL}/${id}`);
+  return sendRequest(`${BASE_URL}/${id}`); // now hits showJeopardy
 }
+
 
 export function create(data) {
   // data = { title, categories, author }
@@ -49,14 +50,17 @@ export function getQuestions(id, categoryId) {
 }
 
 export function addQuestion(id, categoryId, data) {
-  // data = { text, points, dailyDouble }
-  return sendRequest(`${BASE_URL}/${id}/categories/${categoryId}/questions`, 'POST', { ...data, categoryId });
+  return sendRequest(`${BASE_URL}/${id}/categories/${categoryId}/questions`, 'POST', { ...data });
 }
 
 export function updateQuestion(id, categoryId, questionId, data) {
-  // data = { text?, points?, dailyDouble? }
-  return sendRequest(`${BASE_URL}/${id}/categories/${categoryId}/questions/${questionId}`, 'PUT', { ...data, categoryId });
+  return sendRequest(
+    `${BASE_URL}/${id}/categories/${categoryId}/questions/${questionId}`,
+    'PUT',
+    data // do not spread categoryId
+  );
 }
+
 
 export function deleteQuestion(id, categoryId, questionId) {
   return sendRequest(`${BASE_URL}/${id}/categories/${categoryId}/questions/${questionId}`, 'DELETE');

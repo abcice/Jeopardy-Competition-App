@@ -7,51 +7,45 @@ import SaveButton from "../../../components/SaveButton/SaveButton";
 import * as jeopardyApi from "../../../utilities/jeopardy-api";
 import styles from "./CreateQuestion.module.scss";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
+
 export default function CreateQuestion() {
   const navigate = useNavigate();
   const { jeopardyId } = useParams();
   const location = useLocation();
-  const importedQuestion = location.state?.importedQuestion;
-
 
   const { totalCategories = 0, questionsPerCategory = 0 } = location.state || {};
+  const totalCats = Number(totalCategories);
+
+
+  // Redirect if state is missing
   useEffect(() => {
     if (!totalCategories || !questionsPerCategory) {
-      navigate("/jeopardy/create"); // navigate inside useEffect
+      navigate("/jeopardy/create");
     }
   }, [totalCategories, questionsPerCategory, navigate]);
 
-  if (!totalCategories || !questionsPerCategory) {
-    return null; // prevent rendering until redirect
-  }
-
+  if (!totalCategories || !questionsPerCategory) return null;
 
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
-  const [categoryName, setCategoryName] = useState("");
+  const [categoryName, setCategoryName] = useState(location.state?.categoryName || "");
   const [questions, setQuestions] = useState(
-    Array.from({ length: questionsPerCategory }, (_, i) => ({
-      text: importedQuestion && i === 0 ? importedQuestion.text : "",
-      answer: importedQuestion && i === 0 ? importedQuestion.answer : "",
-      score: importedQuestion && i === 0 ? importedQuestion.score : "",
-      dailyDouble: importedQuestion && i === 0 ? importedQuestion.dailyDouble : false,
-    }))
+    location.state?.currentQuestions ||
+      Array.from({ length: questionsPerCategory }, () => ({
+        text: "",
+        answer: "",
+        score: "",
+        dailyDouble: false,
+      }))
   );
-  const [message, setMessage] = useState("");
-  useEffect(() => {
-  if (importedQuestion) {
-    setQuestions(prev => prev.map((q, i) =>
-      i === importedQuestion.targetQuestionIndex
-        ? {
-            text: importedQuestion.text,
-            answer: importedQuestion.answer,
-            score: importedQuestion.score,
-            dailyDouble: importedQuestion.dailyDouble,
-          }
-        : q
-    ));
-  }
-}, [importedQuestion]);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [finished, setFinished] = useState(false);
 
+  // Restore state when coming back from "Import Question"
+  useEffect(() => {
+    if (location.state?.currentQuestions) {
+      setQuestions(location.state.currentQuestions);
+    }
+  }, [location.state?.currentQuestions]);
 
   const handleQuestionChange = (index, field, value) => {
     const updated = [...questions];
@@ -60,67 +54,65 @@ export default function CreateQuestion() {
   };
 
   const handleSaveCategory = async () => {
-    try {
-      const category = await jeopardyApi.addCategory(jeopardyId, categoryName);
-      for (const q of questions) {
-        await jeopardyApi.addQuestion(jeopardyId, category._id, {
-          text: q.text,
-          answer: q.answer,
-          points: Number(q.score),
-          dailyDouble: q.dailyDouble,
-        });
-      }
-      if (currentCategoryIndex + 1 < totalCategories) {
-        setCurrentCategoryIndex((prev) => prev + 1);
-        setCategoryName("");
-        setQuestions(
-          Array.from({ length: questionsPerCategory }, () => ({
-            text: "",
-            answer: "",
-            score: "",
-            dailyDouble: false,
-          }))
-        );
-        setMessage("✅ Category saved, continue with next one");
-      } else {
-        setMessage("🎉 All categories & questions created!");
-      }
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Failed to save category/questions");
+  try {
+    const jeopardy = await jeopardyApi.addCategory(jeopardyId, categoryName);
+    const newCategory = jeopardy.categories[jeopardy.categories.length - 1];
+
+    for (const q of questions) {
+      const payload = {
+        text: q.text?.trim() || "Untitled Question",
+        answer: q.answer?.trim() || "No answer provided",
+        points: Number.isFinite(Number(q.score)) ? Number(q.score) : 0,
+        dailyDouble: !!q.dailyDouble,
+      };
+      console.log("Saving question:", payload);
+      await jeopardyApi.addQuestion(jeopardyId, newCategory._id, payload);
     }
-  };
+
+    const totalCats = Number(totalCategories);
+
+    if (currentCategoryIndex + 1 < totalCats) {
+      setCurrentCategoryIndex((prev) => prev + 1);
+      setCategoryName("");
+      setQuestions(
+        Array.from({ length: questionsPerCategory }, () => ({
+          text: "",
+          answer: "",
+          score: "",
+          dailyDouble: false,
+        }))
+      );
+      setStatusMessage("✅ Category saved, continue with the next one");
+    } else {
+      setStatusMessage("");  // clear any previous message
+      setFinished(true);     // show the finished screen
+    }
+  } catch (err) {
+    console.error(err);
+    setStatusMessage("❌ Failed to save category/questions");
+  }
+};
+
+
 
   return (
     <>
       <Navbar />
       <div className={styles.createQuestion}>
-        <h1>
-          {message
-            ? message
-            : `Create Category ${currentCategoryIndex + 1} of ${totalCategories}`}
-        </h1>
-
-        {!message && (
+        {!finished ? (
           <>
+            <h1>
+              Create Category {currentCategoryIndex + 1} of {totalCategories}
+            </h1>
+
+            {statusMessage && <p className={styles.status}>{statusMessage}</p>}
+
             <label>Category Name</label>
             <input
               type="text"
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
             />
-            <button
-              type="button"
-              className={styles.importButton}
-              onClick={() =>
-                navigate(`/jeopardy/${jeopardyId}/import-question`, {
-                  state: { currentCategoryIndex, questionsPerCategory }
-                })
-              }
-            >
-              📥 Import from Old Jeopardies
-            </button>
-
 
             {questions.map((q, index) => (
               <div key={index} className={styles.questionBlock}>
@@ -129,11 +121,8 @@ export default function CreateQuestion() {
                 <label>Text</label>
                 <textarea
                   value={q.text}
-                  onChange={(e) =>
-                    handleQuestionChange(index, "text", e.target.value)
-                  }
+                  onChange={(e) => handleQuestionChange(index, "text", e.target.value)}
                 />
-                {/* ✅ Live Preview for Question */}
                 <div className={styles.preview}>
                   <strong>Preview:</strong>
                   <MarkdownRenderer content={q.text} />
@@ -142,11 +131,8 @@ export default function CreateQuestion() {
                 <label>Answer</label>
                 <textarea
                   value={q.answer}
-                  onChange={(e) =>
-                    handleQuestionChange(index, "answer", e.target.value)
-                  }
+                  onChange={(e) => handleQuestionChange(index, "answer", e.target.value)}
                 />
-                {/* ✅ Live Preview for Answer */}
                 <div className={styles.preview}>
                   <strong>Preview:</strong>
                   <MarkdownRenderer content={q.answer} />
@@ -157,9 +143,10 @@ export default function CreateQuestion() {
                   type="number"
                   value={q.score}
                   onChange={(e) =>
-                    handleQuestionChange(index, "score", e.target.value)
+                    handleQuestionChange(index, "score", e.target.value ? parseInt(e.target.value, 10) : 0)
                   }
                 />
+
 
                 <label>
                   Daily Double
@@ -171,16 +158,20 @@ export default function CreateQuestion() {
                     }
                   />
                 </label>
-                 <button
+
+                <button
                   type="button"
                   className={styles.importButton}
                   onClick={() =>
                     navigate(`/jeopardy/${jeopardyId}/import-question`, {
-                      state: { 
+                      state: {
+                        totalCategories,
                         currentCategoryIndex,
                         questionsPerCategory,
-                        targetQuestionIndex: index // <-- pass the question index
-                      }
+                        targetQuestionIndex: index,
+                        currentQuestions: questions,
+                        categoryName,
+                      },
                     })
                   }
                 >
@@ -191,13 +182,12 @@ export default function CreateQuestion() {
 
             <div className={styles.actions}>
               <BackButton />
-              <SaveButton onClick={handleSaveCategory} />
+              <SaveButton onSave={handleSaveCategory} />
             </div>
           </>
-        )}
-
-        {message && (
+        ) : (
           <div className={styles.finished}>
+            <h1>🎉 All categories & questions created!</h1>
             <button onClick={() => navigate(`/jeopardy/${jeopardyId}/edit`)}>
               ✏️ Edit Questions
             </button>

@@ -8,7 +8,6 @@ import * as jeopardyApi from "../../../utilities/jeopardy-api";
 import styles from "./EditCompetition.module.scss";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
 
-
 export default function EditCompetition() {
   const { jeopardyId } = useParams();
   const navigate = useNavigate();
@@ -26,10 +25,14 @@ export default function EditCompetition() {
       try {
         const data = await jeopardyApi.getById(jeopardyId);
         setJeopardy(data);
-        setCategories(data.categories);
-        if (data.categories.length > 0) {
+        setCategories(data.categories || []);
+        if ((data.categories || []).length > 0) {
           setSelectedCategoryId(data.categories[0]._id);
-          setQuestions(data.categories[0].questions);
+          setQuestions(data.categories[0].questions?.map(q => ({
+            ...q,
+            points: q.points || 0,
+            dailyDouble: !!q.dailyDouble
+          })) || []);
         }
       } catch (err) {
         console.error(err);
@@ -44,7 +47,11 @@ export default function EditCompetition() {
     const categoryId = e.target.value;
     setSelectedCategoryId(categoryId);
     const category = categories.find((c) => c._id === categoryId);
-    setQuestions(category?.questions || []);
+    setQuestions(category?.questions.map(q => ({
+      ...q,
+      points: q.points || 0,
+      dailyDouble: !!q.dailyDouble
+    })) || []);
   };
 
   // Handle question field changes
@@ -54,33 +61,44 @@ export default function EditCompetition() {
     setQuestions(updated);
   };
 
-  // Save updated questions
+  // Save all questions in the current category
   const handleSaveQuestions = async () => {
     try {
+      const savedQuestions = [];
+
       for (const q of questions) {
-        if (q._id) {
-          await jeopardyApi.updateQuestion(
-            jeopardyId,
-            selectedCategoryId,
-            q._id,
-            {
-              text: q.text,
-              answer: q.answer,
-              points: Number(q.points),
-              dailyDouble: q.dailyDouble,
-            }
-          );
-        } else {
-          await jeopardyApi.addQuestion(jeopardyId, selectedCategoryId, {
-            text: q.text,
-            answer: q.answer,
-            points: Number(q.points),
-            dailyDouble: q.dailyDouble,
-          });
-        }
-      }
+  const payload = {
+    text: q.text?.trim() || "Untitled Question",
+    answer: q.answer?.trim() || "No answer provided",
+    points: Number(q.points) || 0,
+    dailyDouble: !!q.dailyDouble
+  };
+
+  let savedQuestion;
+  if (q._id) {
+    const res = await jeopardyApi.updateQuestion(
+      jeopardyId,
+      selectedCategoryId,
+      q._id,
+      payload
+    );
+    savedQuestion = res.question || q;
+  } else {
+    const res = await jeopardyApi.addQuestion(
+      jeopardyId,
+      selectedCategoryId,
+      payload
+    );
+    savedQuestion = res[res.length - 1];
+  }
+  savedQuestions.push(savedQuestion);
+}
+
+
+      setQuestions(savedQuestions);
       setMessage("✅ Questions saved successfully");
-      refreshData();
+      await refreshData(selectedCategoryId);
+
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to save questions");
@@ -91,9 +109,9 @@ export default function EditCompetition() {
   const handleUpdateCategoryName = async (categoryId, name) => {
     if (!name.trim()) return;
     try {
-      await jeopardyApi.updateCategory(jeopardyId, categoryId, name);
+      await jeopardyApi.updateCategory(jeopardyId, categoryId, name.trim());
       setMessage("✅ Category name updated");
-      refreshData(categoryId);
+      await refreshData(categoryId);
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to update category name");
@@ -106,7 +124,7 @@ export default function EditCompetition() {
     try {
       await jeopardyApi.deleteCategory(jeopardyId, categoryId);
       setMessage("✅ Category deleted");
-      refreshData();
+      await refreshData();
       setSelectedCategoryId("");
       setQuestions([]);
     } catch (err) {
@@ -121,7 +139,7 @@ export default function EditCompetition() {
     try {
       await jeopardyApi.deleteQuestion(jeopardyId, selectedCategoryId, questionId);
       setMessage("✅ Question deleted");
-      refreshData(selectedCategoryId);
+      await refreshData(selectedCategoryId);
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to delete question");
@@ -135,39 +153,54 @@ export default function EditCompetition() {
       setJeopardy(updatedData);
       setCategories(updatedData.categories);
       const categoryToSelect = keepCategoryId
-        ? updatedData.categories.find(c => c._id === keepCategoryId)
-        : updatedData.categories[0];
-      setSelectedCategoryId(categoryToSelect?._id || "");
-      setQuestions(categoryToSelect?.questions || []);
-    } catch (err) {
+      ? updatedData.categories?.find(c => c._id === keepCategoryId)
+      : updatedData.categories?.[0];
+
+    if (categoryToSelect) {
+    setSelectedCategoryId(categoryToSelect._id);
+    setQuestions(categoryToSelect.questions?.map(q => ({
+      ...q,
+      points: q.points || 0,
+      dailyDouble: !!q.dailyDouble
+    })) || []);
+  } else {
+    setSelectedCategoryId("");
+    setQuestions([]);
+  }} catch (err) {
       console.error(err);
       setMessage("❌ Failed to refresh data");
     }
   };
 
-  // Add new question row
+  // Add new question row locally
   const handleAddQuestion = () => {
     setQuestions((prev) => [
       ...prev,
-      { text: "", answer: "", points: 0, dailyDouble: false },
+      { text: "", answer: "", points: 0, dailyDouble: false }
     ]);
   };
 
-  // Add new category
+  // Add new category + select it immediately
   const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) return;
-    try {
-      const category = await jeopardyApi.addCategory(jeopardyId, newCategoryName);
-      setCategories((prev) => [...prev, category]);
-      setNewCategoryName("");
-      setSelectedCategoryId(category._id);
-      setQuestions([]);
-      setMessage("✅ New category added");
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Failed to add category");
-    }
-  };
+  const trimmedName = newCategoryName.trim();
+    if (!trimmedName) return;
+
+    console.log("Adding category:", trimmedName);
+  try {
+    const jeopardyData = await jeopardyApi.addCategory(jeopardyId, newCategoryName.trim());
+    console.log("API Response:", jeopardyData);
+    const newCategory = jeopardyData.categories[jeopardyData.categories.length - 1];
+    setCategories(jeopardyData.categories);
+    setNewCategoryName("");
+    setSelectedCategoryId(newCategory._id);
+    setQuestions([]);
+    setMessage("✅ New category added, now add questions!");
+  } catch (err) {
+    console.error(err);
+    setMessage("❌ Failed to add category");
+  }
+};
+
 
   if (!jeopardy) return <p>Loading...</p>;
 
@@ -237,7 +270,6 @@ export default function EditCompetition() {
                   value={q.text}
                   onChange={(e) => handleQuestionChange(index, "text", e.target.value)}
                 />
-                {/* ✅ Live Preview */}
                 <div className={styles.preview}>
                   <strong>Preview:</strong>
                   <MarkdownRenderer content={q.text} />
@@ -248,12 +280,11 @@ export default function EditCompetition() {
                   value={q.answer}
                   onChange={(e) => handleQuestionChange(index, "answer", e.target.value)}
                 />
-                 {/* ✅ Live Preview */}
                 <div className={styles.preview}>
                   <strong>Preview:</strong>
                   <MarkdownRenderer content={q.answer} />
                 </div>
-                
+
                 <label>Score</label>
                 <input
                   type="number"
@@ -286,7 +317,7 @@ export default function EditCompetition() {
         <div className={styles.actions}>
           <BackButton />
           <button onClick={handleAddQuestion}>➕ Add Question</button>
-          <SaveButton onClick={handleSaveQuestions} />
+          <SaveButton onSave={handleSaveQuestions} />
         </div>
       </div>
       <Footer />
