@@ -12,9 +12,11 @@ export function getById(id) {
   return sendRequest(`${BASE_URL}/${id}`);
 }
 
+// utilities/competition-api.js
 export function create(jeopardyId) {
-  return sendRequest(BASE_URL, 'POST', { jeopardyId });
+  return sendRequest(BASE_URL, 'POST', { jeopardyId }); // 👈 matches controller
 }
+
 
 export function deleteCompetition(id) {
   return sendRequest(`${BASE_URL}/${id}`, 'DELETE');

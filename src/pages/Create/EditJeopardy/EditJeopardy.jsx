@@ -1,4 +1,3 @@
-// src/pages/Jeopardy/EditJeopardy/EditJeopardy.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
@@ -13,22 +12,39 @@ export default function EditJeopardy() {
   const navigate = useNavigate();
 
   // Fetch all jeopardy games
-  useEffect(() => {
-    async function fetchJeopardies() {
-      try {
-        const data = await jeopardyApi.getAll();
-        setJeopardies(data);
-      } catch (err) {
-        console.error(err);
-        setMessage("❌ Failed to load jeopardy games");
-      }
+  const fetchJeopardies = async () => {
+    try {
+      const data = await jeopardyApi.getAll();
+      setJeopardies(data);
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Failed to load jeopardy games");
     }
+  };
+
+  useEffect(() => {
     fetchJeopardies();
   }, []);
 
   const handleEdit = (id) => {
     navigate(`/jeopardy/edit/${id}`);
   };
+
+  // New: handle delete
+const handleDelete = async (id, title) => {
+  if (!window.confirm(`Are you sure you want to delete "${title}"? This cannot be undone.`)) return;
+
+  try {
+    await jeopardyApi.deleteJeopardy(id);
+    await fetchJeopardies(); // refresh list first
+setMessage(`✅ "${title}" has been deleted successfully`);
+setTimeout(() => setMessage(""), 3000); // clears after 3 seconds
+  } catch (err) {
+    console.error(err);
+    setMessage(`❌ Failed to delete "${title}"`);
+  }
+};
+
 
   if (!jeopardies.length) {
     return (
@@ -58,7 +74,17 @@ export default function EditJeopardy() {
             <div key={j._id} className={styles.jeopardyCard}>
               <h3>{j.title}</h3>
               <p>Categories: {j.categories.length}</p>
-              <button onClick={() => handleEdit(j._id)}>Edit →</button>
+              <div className={styles.actions}>
+                <button
+                 className={styles.editButton} onClick={() => handleEdit(j._id)}>
+                  Edit →</button>
+                <button
+                  className={styles.deleteButton}
+                  onClick={() => handleDelete(j._id, j.title)}
+                >
+                  🗑 Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>

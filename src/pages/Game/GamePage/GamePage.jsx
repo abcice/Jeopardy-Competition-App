@@ -25,10 +25,15 @@ export default function GamePage() {
     async function fetchTeams() {
       try {
         const comp = await competitionApi.getById(competitionId);
+        console.log("Fetched competition:", comp);
         setIdentifierType(comp.identifierType || 'colors');
 
         const teamsData = comp.teams || [];
         setTeams(teamsData);
+        const { competition } = await competitionApi.getById(competitionId);
+        console.log("Fetched competition:", competition);
+        setIdentifierType(competition.identifierType || 'colors');
+        setTeams(competition.teams || []);
         setLoading(false);
       } catch (err) {
         console.error(err);

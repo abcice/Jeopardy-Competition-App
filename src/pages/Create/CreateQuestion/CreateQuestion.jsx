@@ -188,9 +188,10 @@ export default function CreateQuestion() {
         ) : (
           <div className={styles.finished}>
             <h1>🎉 All categories & questions created!</h1>
-            <button onClick={() => navigate(`/jeopardy/${jeopardyId}/edit`)}>
+            <button onClick={() => navigate(`/jeopardy/edit/${jeopardyId}`)}>
               ✏️ Edit Questions
             </button>
+
             <button onClick={() => navigate("/dashboard")}>🏠 Go to Dashboard</button>
           </div>
         )}

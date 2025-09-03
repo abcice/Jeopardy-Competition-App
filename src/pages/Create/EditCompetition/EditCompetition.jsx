@@ -18,6 +18,8 @@ export default function EditCompetition() {
   const [questions, setQuestions] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [message, setMessage] = useState("");
+  const [saved, setSaved] = useState(false);
+
 
   // Fetch jeopardy game on mount
   useEffect(() => {
@@ -97,11 +99,13 @@ export default function EditCompetition() {
 
       setQuestions(savedQuestions);
       setMessage("✅ Questions saved successfully");
+      setSaved(true);
       await refreshData(selectedCategoryId);
 
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to save questions");
+      setSaved(false);
     }
   };
 
@@ -212,6 +216,8 @@ export default function EditCompetition() {
 
         {message && <p className={styles.message}>{message}</p>}
 
+
+
         {/* Add new category */}
         <div className={styles.newCategory}>
           <input
@@ -318,6 +324,14 @@ export default function EditCompetition() {
           <BackButton />
           <button onClick={handleAddQuestion}>➕ Add Question</button>
           <SaveButton onSave={handleSaveQuestions} />
+                  {saved && (
+          <button
+            className={styles.goDashboard}
+            onClick={() => navigate("/")}
+          >
+            🏠 Go to Dashboard
+          </button>
+        )}
         </div>
       </div>
       <Footer />

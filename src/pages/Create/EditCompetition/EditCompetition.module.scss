@@ -4,19 +4,32 @@
   padding: 2em;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
   h1 {
     text-align: center;
-    margin-bottom: 1em;
+    margin-bottom: 1.5em;
+    font-size: 1.8em;
+    color: #333;
   }
 
   .message {
-    color: green;
+    text-align: center;
+    font-weight: bold;
     margin-bottom: 1em;
+
+    &.success {
+      color: #28a745;
+    }
+
+    &.error {
+      color: #dc3545;
+    }
   }
 
-  .newCategory, .selectCategory {
+  .newCategory,
+  .selectCategory {
     display: flex;
     gap: 0.5em;
     align-items: center;
@@ -24,37 +37,176 @@
 
     input {
       flex: 1;
+      padding: 0.5em;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.95em;
+    }
+
+    button {
+      padding: 0.5em 1em;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      background-color: #007bff;
+      color: #fff;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: #0069d9;
+      }
+
+      &:active {
+        background-color: #005cbf;
+      }
     }
   }
 
+  .editCategory {
+  display: flex;
+  gap: 0.5em;
+  margin-top: 0.5em;
+  flex-wrap: wrap;
+
+  input {
+    flex: 1 1 300px; // grow, shrink, base width
+    min-width: 250px; // prevent it from being too small
+    padding: 0.6em 0.8em;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+  }
+
+  button {
+    padding: 0.5em 0.8em;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:first-of-type {
+      background-color: #28a745; // save name
+      color: #fff;
+      &:hover {
+        background-color: #218838;
+      }
+      &:active {
+        background-color: #1e7e34;
+      }
+    }
+
+    &:last-of-type {
+      background-color: #dc3545; // delete category
+      color: #fff;
+      &:hover {
+        background-color: #c82333;
+      }
+      &:active {
+        background-color: #a71d2a;
+      }
+    }
+  }
+}
+
   .questions {
-    margin-top: 1em;
+    margin-top: 1.5em;
 
     .questionBlock {
       padding: 1em;
       border: 1px solid #ddd;
       border-radius: 8px;
       margin-bottom: 1em;
-      background-color: #fafafa;
-    }
+      background-color: #f9f9f9;
 
-    .preview {
-      margin-top: 0.5em;
-      padding: 0.5em;
-      background: #f0f0f0;
-      border-radius: 6px;
-    }
+      h3 {
+        margin-top: 0;
+        margin-bottom: 0.5em;
+        font-size: 1.1em;
+        color: #333;
+      }
 
-    .deleteQuestion {
-      background: #dc3545;
-      color: #fff;
-      margin-top: 0.5em;
+      label {
+        display: block;
+        margin-top: 0.5em;
+        font-weight: 600;
+        font-size: 0.95em;
+        color: #555;
+      }
+
+      textarea,
+      input[type='number'] {
+        width: 100%;
+        padding: 0.5em;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 0.95em;
+        margin-top: 0.25em;
+      }
+
+      input[type='checkbox'] {
+        margin-left: 0.5em;
+        transform: scale(1.1);
+        cursor: pointer;
+      }
+
+      .preview {
+        margin-top: 0.5em;
+        padding: 0.5em;
+        background: #f0f0f0;
+        border-radius: 6px;
+        font-size: 0.95em;
+        color: #333;
+      }
+
+      .deleteQuestion {
+        margin-top: 0.5em;
+        padding: 0.5em 0.8em;
+        border-radius: 6px;
+        border: none;
+        background-color: #dc3545;
+        color: #fff;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background-color: #c82333;
+        }
+        &:active {
+          background-color: #a71d2a;
+        }
+      }
     }
   }
 
   .actions {
     display: flex;
-    justify-content: space-between;
-    margin-top: 1em;
+    gap: 0.5em;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: 1.5em;
+
+    button {
+      padding: 0.5em 1em;
+      border-radius: 6px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &.goDashboard {
+        background-color: #17a2b8;
+        color: #fff;
+
+        &:hover {
+          background-color: #138496;
+        }
+        &:active {
+          background-color: #117a8b;
+        }
+      }
+    }
   }
 }

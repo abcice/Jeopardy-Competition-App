@@ -11,8 +11,16 @@
   }
 
   .message {
-    color: red;
     text-align: center;
+    font-weight: bold;
+
+    &.success {
+      color: #28a745; // green for success
+    }
+
+    &.error {
+      color: #dc3545; // red for errors
+    }
   }
 
   .jeopardyList {
@@ -21,18 +29,57 @@
     flex-direction: column;
     gap: 1em;
 
-    div {
+    .jeopardyCard {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0.8em;
       border: 1px solid #ddd;
       border-radius: 8px;
-      background-color: #fafafa;
+      background-color: #fafafa; // light neutral background
 
-      button {
-        background: #007bff;
-        color: #fff;
+      h3 {
+        margin: 0;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.5em;
+
+        button {
+          padding: 0.5em 1em;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+          transition: all 0.2s ease;
+
+          &.deleteButton {
+            background-color: #dc3545;
+            color: #fff;
+
+            &:hover {
+              background-color: #c82333;
+            }
+
+            &:active {
+              background-color: #a71d2a;
+            }
+          }
+
+          &.editButton {
+            background-color: #007bff;
+            color: #fff;
+
+            &:hover {
+              background-color: #0069d9;
+            }
+
+            &:active {
+              background-color: #005cbf;
+            }
+          }
+        }
       }
     }
   }
