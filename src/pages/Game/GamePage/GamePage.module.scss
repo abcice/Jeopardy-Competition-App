@@ -1,61 +1,49 @@
+/* GamePage.module.scss */
 .gamePage {
-  max-width: 700px;
-  margin: 2em auto;
-  padding: 2em;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 
   main {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 1em;
-  }
-
-  h1, h2 {
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
     text-align: center;
   }
 
-  .controls {
+  .buttonsContainer {
     display: flex;
-    flex-direction: column;
-    gap: 1em;
-
-    input, select {
-      width: 100%;
-    }
-
-    button {
-      background-color: #007bff;
-      color: #fff;
-      padding: 0.5em;
-      border-radius: 6px;
-      font-size: 1rem;
-      &:hover {
-        background-color: #0056b3;
-      }
-    }
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
   }
 
-  .teamsPreview {
-    ul {
-      list-style: none;
-      padding: 0;
-      li {
-        padding: 0.5em 0;
-        font-weight: bold;
-      }
-    }
-  }
+  .teamButton {
+    padding: 1.5rem 2rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, opacity 0.2s;
 
-  .actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 1em;
+    &:hover:not(:disabled) {
+      transform: scale(1.05);
+      cursor: pointer;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
 
   .message {
-    text-align: center;
-    color: green;
+    font-weight: bold;
+    color: red;
   }
 }

@@ -67,3 +67,24 @@
     color: #e53935;
   }
 }
+.goBackContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.goBackButton {
+  background-color: #007bff;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.goBackButton:hover {
+  background-color: #0056b3;
+}

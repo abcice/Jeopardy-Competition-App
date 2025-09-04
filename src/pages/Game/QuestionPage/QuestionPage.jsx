@@ -1,5 +1,6 @@
+// src/pages/Competition/QuestionPage/QuestionPage.jsx
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import * as competitionApi from "../../../utilities/competition-api";
@@ -9,7 +10,6 @@ import RankingContent from "../RankingPage/RankingContent";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
 import BuzzButton from "../../../components/BuzzButton/BuzzButton";
 
-
 export default function QuestionPage() {
   const { competitionId } = useParams();
 
@@ -17,67 +17,101 @@ export default function QuestionPage() {
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [teamAnswering, setTeamAnswering] = useState(null); // team that buzzed first
   const [showDailyDouble, setShowDailyDouble] = useState(false);
+  const [dailyDoubleResolved, setDailyDoubleResolved] = useState(false);
+  const [dailyDoubleBid, setDailyDoubleBid] = useState(null);
   const [answerShown, setAnswerShown] = useState(false);
   const [message, setMessage] = useState("");
   const [showRanking, setShowRanking] = useState(false);
+  const [buzzersVisible, setBuzzersVisible] = useState(false);
+  const [lastQuestionId, setLastQuestionId] = useState(null);
+  const [readyToGoBack, setReadyToGoBack] = useState(false);
 
-  
 
-  // Fetch competition data
-  const fetchCompetition = async () => {
-    try {
-      const res = await competitionApi.getById(competitionId);
-      setCompetition(res.competition);
-      setCurrentQuestion(res.currentQuestionDetails);
-      return res.competition; // ✅ return latest competition
+  const navigate = useNavigate();
 
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Failed to load competition or question.");
-      return null;
+  // Fetch competition + question once when page loads
+const fetchCompetition = async () => {
+  try {
+    const res = await competitionApi.getById(competitionId);
+    const newQuestion = res.currentQuestionDetails;
 
+    setCompetition(res.competition);
+    setCurrentQuestion(newQuestion);
+
+    // Only reset if question changed
+    if (newQuestion?._id !== lastQuestionId) {
+      setDailyDoubleResolved(false);
+      setDailyDoubleBid(null);
+      setTeamAnswering(null);
+      setAnswerShown(false);  // ✅ only reset for NEW question
+      setLastQuestionId(newQuestion?._id || null);
     }
-  };
 
-useEffect(() => {
-  fetchCompetition();
-  const interval = setInterval(fetchCompetition, 3000);
-  return () => clearInterval(interval);
-}, [competitionId]);
-
-useEffect(() => {
-  if (currentQuestion?.dailyDouble && teamAnswering) {
-    setShowDailyDouble(true);
-  } else {
-    setShowDailyDouble(false);
+    return res.competition;
+  } catch (err) {
+    console.error(err);
+    setMessage("❌ Failed to load competition or question.");
+    return null;
   }
-}, [currentQuestion, teamAnswering]);
+};
 
+
+  useEffect(() => {
+    fetchCompetition();
+  }, [competitionId]);
+
+  // Show Daily Double popup when conditions match
+  useEffect(() => {
+    if (
+      currentQuestion?.dailyDouble &&
+      teamAnswering &&
+      !dailyDoubleResolved &&
+      dailyDoubleBid === null
+    ) {
+      setShowDailyDouble(true);
+    } else {
+      setShowDailyDouble(false);
+    }
+  }, [currentQuestion, teamAnswering, dailyDoubleResolved, dailyDoubleBid]);
 
   // Instructor-only handlers
-  const handleCorrect = async () => {
-    if (!teamAnswering) {
-      setMessage("⚠️ No team selected to answer.");
-      return;
-    }
-    try {
-      await competitionApi.markCorrect(competitionId, teamAnswering._id, teamAnswering.bid || 0);
-      setAnswerShown(true);
-const updatedCompetition = await fetchCompetition();
-if (updatedCompetition) {
-  const totalQuestions = updatedCompetition.jeopardy.categories.reduce(
-    (acc, cat) => acc + cat.questions.length,
-    0
-  );
-  if (updatedCompetition.answeredQuestions.length === totalQuestions) {
-    setShowRanking(true);
+const handleCorrect = async () => {
+  if (!teamAnswering) {
+    setMessage("⚠️ No team selected to answer.");
+    return;
   }
+  try {
+    await competitionApi.markCorrect(
+      competitionId,
+      teamAnswering._id,
+      teamAnswering.bid || 0
+    );
+
+    // Show the answer immediately
+    setAnswerShown(true);
+
+    // Set Go Back button visible
+    setReadyToGoBack(true);
+
+    // Optionally fetch competition **without overwriting currentQuestion**
+    const updatedCompetition = await competitionApi.getById(competitionId);
+    setCompetition(updatedCompetition.competition);
+
+    // Check if all questions answered
+    const totalQuestions = updatedCompetition.competition.jeopardy.categories.reduce(
+      (acc, cat) => acc + cat.questions.length,
+      0
+    );
+    if (updatedCompetition.competition.answeredQuestions.length === totalQuestions) {
+      setShowRanking(true);
     }
-     } catch (err) {
-      console.error(err);
-      setMessage("❌ Failed to mark correct.");
-    }
-  };
+
+  } catch (err) {
+    console.error(err);
+    setMessage("❌ Failed to mark correct.");
+  }
+};
+
 
   const handleWrong = async () => {
     if (!teamAnswering) {
@@ -85,7 +119,11 @@ if (updatedCompetition) {
       return;
     }
     try {
-      await competitionApi.markWrong(competitionId, teamAnswering._id, teamAnswering.bid || 0);
+      await competitionApi.markWrong(
+        competitionId,
+        teamAnswering._id,
+        teamAnswering.bid || 0
+      );
       setTeamAnswering(null); // allow next buzz
       setMessage("Teams may buzz again.");
       await fetchCompetition();
@@ -95,47 +133,57 @@ if (updatedCompetition) {
     }
   };
 
-  const handleSkip = async () => {
-    try {
-      await competitionApi.skipQuestion(competitionId);
-      setAnswerShown(true);
-      setTeamAnswering(null);
-const updatedCompetition = await fetchCompetition();
-if (updatedCompetition) {
-  const totalQuestions = updatedCompetition.jeopardy.categories.reduce(
-    (acc, cat) => acc + cat.questions.length,
-    0
-  );
-  if (updatedCompetition.answeredQuestions.length === totalQuestions) {
-    setShowRanking(true);
-  }
-}
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Failed to skip question.");
-    }
-  };
+const handleSkip = async () => {
+  try {
+    await competitionApi.skipQuestion(competitionId);
 
-  if (!competition || !currentQuestion) return <p>Loading question...</p>;
+    // Show the answer immediately
+    setAnswerShown(true);
+    setTeamAnswering(null);
+
+    // Update competition (scores, answered questions) WITHOUT overwriting currentQuestion
+    const updatedCompetition = await competitionApi.getById(competitionId);
+    setCompetition(updatedCompetition.competition);
+
+    // Check if all questions answered
+    const totalQuestions = updatedCompetition.competition.jeopardy.categories.reduce(
+      (acc, cat) => acc + cat.questions.length,
+      0
+    );
+    if (updatedCompetition.competition.answeredQuestions.length === totalQuestions) {
+      setShowRanking(true);
+    }
+
+    // Show Go Back button
+    setReadyToGoBack(true);
+
+  } catch (err) {
+    console.error(err);
+    setMessage("❌ Failed to skip question.");
+  }
+};
+
+
   // ✅ if game is over, show ranking instead of question UI
   if (showRanking) {
     return <RankingContent competitionId={competitionId} />;
   }
+  if (!competition || !currentQuestion) return <p>Loading question...</p>;
 
   return (
     <>
       <Navbar />
-      <main 
-        className={`${styles["question-page"]} ${showDailyDouble ? styles.dailyDoubleActive : ""}`}
-
+      <main
+        className={`${styles["question-page"]} ${
+          showDailyDouble ? styles.dailyDoubleActive : ""
+        }`}
       >
         <h2>
           {currentQuestion.category.name} - {currentQuestion.points}
         </h2>
         <div className={styles.questionText}>
-         <MarkdownRenderer content={currentQuestion.text} />
+          <MarkdownRenderer content={currentQuestion.text} />
         </div>
-
 
         {answerShown && (
           <div className={styles.answer}>
@@ -144,52 +192,95 @@ if (updatedCompetition) {
           </div>
         )}
 
-
-        {teamAnswering ? (
-          <p className={styles.teamAnswering}>
-            Team answering: {teamAnswering.name}
-          </p>
-        ) : (
-          <p className={styles.waiting}>Waiting for a team to buzz...</p>
+        {buzzersVisible && (
+          <div className={styles.buzzersContainer}>
+            {competition.teams.map((team) => (
+              <BuzzButton
+                key={team._id}
+                team={team}
+                identifierType={competition.identifierType || "colors"}
+                onBuzz={(team) => {
+                  setTeamAnswering(team);
+                  if (currentQuestion?.dailyDouble) {
+                    setDailyDoubleResolved(false);
+                    setDailyDoubleBid(null);
+                  }
+                }}
+                disabled={!!teamAnswering && teamAnswering._id !== team._id}
+              />
+            ))}
+          </div>
         )}
 
-        {message && <p className={styles.message}>{message}</p>}
-        
-        <div className={styles.buzzersContainer}>
-          {competition.teams.map((team) => (
-            <BuzzButton
-              key={team._id}
-              team={team}
-              identifierType={competition.identifierType || "colors"}
-              onBuzz={(team) => setTeamAnswering(team)}
-              disabled={!!teamAnswering && teamAnswering._id !== team._id}
-            />
+        {buzzersVisible &&
+          (teamAnswering ? (
+            <p className={styles.teamAnswering}>
+              Team answering: {teamAnswering.name}
+            </p>
+          ) : (
+            <p className={styles.waiting}>Waiting for a team to buzz...</p>
           ))}
-        </div>
 
-
-
+        {message && <p className={styles.message}>{message}</p>}
 
         {/* Instructor-only controls */}
         <div className={styles.controls}>
-          <button onClick={handleCorrect} disabled={!teamAnswering || answerShown || showDailyDouble}>Correct</button>
-          <button onClick={handleWrong} disabled={!teamAnswering || showDailyDouble}>Wrong</button>
-          <button onClick={handleSkip} disabled={answerShown || showDailyDouble}>Skip</button>
+          <button
+            onClick={() => setBuzzersVisible(true)}
+            disabled={buzzersVisible || readyToGoBack}
+          >
+            Start!
+          </button>
+          <button
+            onClick={handleCorrect}
+            disabled={!teamAnswering || answerShown || showDailyDouble || readyToGoBack}
+          >
+            Correct
+          </button>
+          <button
+            onClick={handleWrong}
+            disabled={!teamAnswering || showDailyDouble || readyToGoBack}
+          >
+            Wrong
+          </button>
+          <button
+            onClick={handleSkip}
+            disabled={answerShown || showDailyDouble || readyToGoBack}
+          >
+            Skip
+          </button>
         </div>
+{readyToGoBack && (
+  <div className={styles.goBackContainer}>
+    <button
+      className={styles.goBackButton}
+      onClick={() => navigate(`/competitions/${competitionId}/board`)}
+    >
+      ⬅ Go Back to Question Board
+    </button>
+  </div>
+)}
+
+
+
 
         {showDailyDouble && teamAnswering && (
-        <DailyDouble
-          competitionId={competitionId}
-          team={teamAnswering}
-          question={currentQuestion}
-          onFinish={async () => {
-            setShowDailyDouble(false);
-            setAnswerShown(true);
-            await fetchCompetition();
-          }}
-        />
-      )}
-
+          <DailyDouble
+            competitionId={competitionId}
+            team={teamAnswering}
+            question={currentQuestion}
+            onSubmitBid={(bid) => {
+              setDailyDoubleBid(bid);
+              setTeamAnswering({ ...teamAnswering, bid }); // ✅ persist bid on team
+              setDailyDoubleResolved(true);
+              setShowDailyDouble(false);
+            }}
+            onCancel={() => {
+              setDailyDoubleResolved(true);
+              setShowDailyDouble(false);
+            }}
+          />
+        )}
 
         <h3>Scores:</h3>
         <ul>

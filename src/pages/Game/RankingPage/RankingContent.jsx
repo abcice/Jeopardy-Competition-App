@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import * as competitionApi from "../../../utilities/competition-api";
+import Navbar from "../../../components/Navbar/Navbar";
+import Footer from "../../../components/Footer/Footer";
 import styles from "./RankingPage.module.scss";
 
 export default function RankingContent({ competitionId }) {
   const [competition, setCompetition] = useState(null);
   const [gameFinished, setGameFinished] = useState(false);
+  const navigate = useNavigate();
 
   const fetchCompetition = async () => {
     try {
@@ -32,6 +36,16 @@ export default function RankingContent({ competitionId }) {
   const sortedTeams = [...competition.teams].sort((a, b) => b.score - a.score);
   const winnerTeam = gameFinished ? sortedTeams[0] : null;
 
+  // ✅ Handler for finishing the game
+  const handleFinishGame = async () => {
+    try {
+      await competitionApi.updateStatus(competitionId, "finished");
+      navigate("/"); // back to dashboard
+    } catch (err) {
+      console.error("Failed to complete game", err);
+    }
+  };
+
   return (
     <div className={`${styles["ranking-page"]} ${gameFinished ? styles.finished : ""}`}>
       <h2>{gameFinished ? "🏆 Game Over! Winner:" : "Current Rankings"}</h2>
@@ -54,6 +68,12 @@ export default function RankingContent({ competitionId }) {
           </li>
         ))}
       </ul>
+
+      {gameFinished && (
+        <button className={styles.finishButton} onClick={handleFinishGame}>
+          Finish Game & Return to Dashboard
+        </button>
+      )}
     </div>
   );
 }

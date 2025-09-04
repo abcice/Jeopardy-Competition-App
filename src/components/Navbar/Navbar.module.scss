@@ -1,35 +1,63 @@
+/* Navbar.module.scss */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #2563eb; // nice blue
-  color: #ffffff;
-  padding: 12px 24px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  font-family: "Inter", sans-serif;
+  padding: 0.8rem 1.5rem;
+  background-color: #1a1a1a;
+  color: white;
+  font-weight: bold;
 
-  .user-name {
-    font-weight: 600;
-    font-size: 1.1rem;
+  button {
+    margin-right: 1rem;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .nav-left, .nav-right {
+    display: flex;
+    align-items: center;
   }
 
   .logout-button {
-    background-color: #ef4444; // red
+    background-color: #ff4d4f;
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
     color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
+    font-weight: bold;
+    margin-left: 1rem;
     &:hover {
-      background-color: #dc2626; // darker red
-      transform: scale(1.05);
+      background-color: #ff7875;
     }
+  }
 
-    &:active {
-      transform: scale(0.97);
-    }
+  .user-name {
+    margin-left: 1rem;
+  }
+}
+
+/* Footer.module.scss */
+.footer {
+  background-color: #f8f8f8;
+  padding: 1rem 1.5rem;
+  color: #333;
+  text-align: center;
+  margin-top: auto; /* pushes footer to bottom if content is short */
+}
+
+.separator {
+  border: none;
+  border-top: 2px solid #ccc;
+  margin-bottom: 1rem;
+}
+
+.footer-content {
+  p {
+    margin: 0.3rem 0;
   }
 }

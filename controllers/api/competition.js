@@ -33,24 +33,43 @@ export async function index(req, res) {
 // Show one competition
 export async function show(req, res) {
   try {
-    const competition = await Competition.findById(req.params.id).populate('jeopardy').exec();
-    if (!competition) return res.status(404).json({ msg: "Competition not found" });
+    const competition = await Competition.findById(req.params.id)
+      .populate("teams")
+      .populate("jeopardy");
 
-    // Extract current question details from Jeopardy
+    if (!competition) {
+      return res.status(404).json({ msg: "Competition not found" });
+    }
+
+    // Load full jeopardy with categories & questions
+    const jeopardy = await Jeopardy.findById(competition.jeopardy._id);
+
     let currentQuestionDetails = null;
+
     if (competition.currentQuestion) {
-      for (const category of competition.jeopardy.categories) {
-        const q = category.questions.id(competition.currentQuestion);
-        if (q) {
-          currentQuestionDetails = q;
+      // Search for the question inside categories
+      for (const category of jeopardy.categories) {
+        const question = category.questions.id(competition.currentQuestion);
+        if (question) {
+          currentQuestionDetails = {
+            ...question.toObject(),
+            category: {
+              _id: category._id,
+              name: category.name,
+            },
+          };
           break;
         }
       }
     }
 
-    res.status(200).json({ competition, currentQuestionDetails });
-  } catch (e) {
-    res.status(400).json({ msg: e.message });
+    res.status(200).json({
+      competition,
+      currentQuestionDetails,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ msg: err.message });
   }
 }
 // Create a new competition

@@ -1,8 +1,7 @@
-import styles from './DailyDouble.module.scss'
-import * as competitionApi from '../../../../utilities/competition-api'
-import { useState } from 'react'
+import { useState } from "react";
+import styles from "./DailyDouble.module.scss";
 
-export default function DailyDouble({ competitionId, team, question, onFinish }) {
+export default function DailyDouble({ competitionId, team, question, onSubmitBid, onCancel }) {
   const [bid, setBid] = useState('');
   const [error, setError] = useState('');
 
@@ -11,8 +10,8 @@ export default function DailyDouble({ competitionId, team, question, onFinish })
     setError('');
   };
 
-  const handleSubmit = async () => {
-    const numericBid = parseInt(bid);
+  const handleSubmit = () => {
+    const numericBid = parseInt(bid, 10);
     if (isNaN(numericBid) || numericBid <= 0) {
       setError('⚠️ Enter a valid positive number');
       return;
@@ -22,17 +21,7 @@ export default function DailyDouble({ competitionId, team, question, onFinish })
       return;
     }
 
-    try {
-      await competitionApi.markCorrect(competitionId, team._id, numericBid);
-      onFinish(); // close DailyDouble, return to QuestionPage
-    } catch (err) {
-      console.error(err);
-      setError('❌ Failed to submit bid');
-    }
-  };
-
-  const handleCancel = () => {
-    onFinish(); // allow skipping/returning if needed
+    onSubmitBid(numericBid); // ✅ pass back to parent state
   };
 
   return (
@@ -41,11 +30,17 @@ export default function DailyDouble({ competitionId, team, question, onFinish })
         <h2>💥 Daily Double!</h2>
         <p>Your current score: {team.score}</p>
         <p>Enter your bid:</p>
-        <input type="number" value={bid} onChange={handleBidChange} min="1" max={team.score} />
+        <input
+          type="number"
+          value={bid}
+          onChange={handleBidChange}
+          min="1"
+          max={team.score}
+        />
         {error && <p className={styles.error}>{error}</p>}
         <div className={styles.buttons}>
           <button onClick={handleSubmit}>Submit Bid</button>
-          <button onClick={handleCancel}>Cancel</button>
+          <button onClick={onCancel}>Cancel</button>
         </div>
         <p>If correct, you will earn double your bid!</p>
       </div>

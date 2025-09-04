@@ -4,9 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import * as competitionApi from "../../../utilities/competition-api";
-import styles from "./QuestionBoard.module.scss";
 import RankingContent from "../RankingPage/RankingContent";
-
+import styles from "./QuestionBoard.module.scss";
 
 export default function QuestionBoard() {
   const { competitionId } = useParams();
@@ -19,12 +18,9 @@ export default function QuestionBoard() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const comp = await competitionApi.getById(competitionId);
-        setCompetition(comp);
-
-        const jeopardyRes = await fetch(`/api/jeopardies/${comp.jeopardyId}`);
-        const jeopardyData = await jeopardyRes.json();
-        setJeopardy(jeopardyData);
+        const { competition } = await competitionApi.getById(competitionId);
+        setCompetition(competition);
+        setJeopardy(competition.jeopardy);
       } catch (err) {
         console.error(err);
         setMessage("❌ Failed to load competition board");
@@ -48,11 +44,9 @@ export default function QuestionBoard() {
     }
   };
 
-  // Helper to check if question is already answered
-  const isAnswered = (questionId) => {
-    return competition.answeredQuestions?.includes(questionId);
-  };
-  
+  const isAnswered = (questionId) =>
+    competition.answeredQuestions?.includes(questionId);
+
   if (showRanking) {
     return (
       <>
@@ -66,54 +60,49 @@ export default function QuestionBoard() {
     <>
       <Navbar />
       <main className={styles.board}>
-        <h1>{jeopardy.title} - Question Board</h1>
+        <h1 className={styles.title}>{jeopardy.title}</h1>
         {message && <p className={styles.message}>{message}</p>}
 
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              {categories.map((cat) => (
-                <th key={cat._id}>{cat.name}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: maxQuestions }).map((_, rowIndex) => (
-              <tr key={rowIndex}>
-                {categories.map((cat) => {
-                  const question = cat.questions[rowIndex];
-                  if (!question) {
-                    return (
-                      <td key={cat._id + "-" + rowIndex}>
-                        <span className={styles.empty}></span>
-                      </td>
-                    );
-                  }
+        <div
+          className={styles.grid}
+          style={{ gridTemplateColumns: `repeat(${categories.length}, 1fr)` }}
+        >
+          {/* Category headers */}
+          {categories.map((cat) => (
+            <div key={cat._id} className={styles.category}>
+              {cat.name}
+            </div>
+          ))}
 
-                  const answered = isAnswered(question._id);
+          {/* Questions */}
+          {Array.from({ length: maxQuestions }).map((_, rowIndex) =>
+            categories.map((cat) => {
+              const question = cat.questions[rowIndex];
+              if (!question) {
+                return <div key={cat._id + "-" + rowIndex}></div>;
+              }
 
-                  return (
-                    <td key={cat._id + "-" + rowIndex}>
-                      <button
-                        className={`${styles.cell} ${
-                          answered ? styles.answered : ""
-                        }`}
-                        onClick={() =>
-                          !answered && handleCellClick(question._id)
-                        }
-                        disabled={answered}
-                      >
-                        {question.points}
-                      </button>
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              const answered = isAnswered(question._id);
+
+              return (
+                <button
+                  key={cat._id + "-" + rowIndex}
+                  className={`${styles.cell} ${
+                    answered ? styles.answered : ""
+                  }`}
+                  onClick={() => !answered && handleCellClick(question._id)}
+                  disabled={answered}
+                >
+                  {question.points}
+                </button>
+              );
+            })
+          )}
+        </div>
       </main>
-      <button onClick={() => setShowRanking(true)}>Show Rankings</button>
+      <button className={styles.rankingBtn} onClick={() => setShowRanking(true)}>
+        Show Rankings
+      </button>
       <Footer />
     </>
   );
