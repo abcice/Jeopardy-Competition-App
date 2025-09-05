@@ -23,43 +23,46 @@ export default function CreateGame() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
-  async function handleSave() {
-    try {
-      setLoading(true);
-      setMessage("");
+async function handleSave() {
+  try {
+    setLoading(true);
+    setMessage("");
 
-      const user = getUser();
-      if (!user) {
-        setMessage("You must be logged in to create a competition.");
-        return;
-      }
-
-      // Step 1: Create Jeopardy game
-      const jeopardy = await jeopardyApi.create({
-        title: formData.name,
-        categories: [],
-        author: user._id,
-      });
-
-      // Step 2: Create Competition linked to Jeopardy
-      await competitionApi.create(jeopardy._id);
-
-      // ✅ Redirect to CreateQuestion page
-      // Correct path based on your routes
-      navigate(`/jeopardy/${jeopardy._id}/create-question`, {
-        state: {
-          totalCategories: Number(formData.categories),
-          questionsPerCategory: Number(formData.questions),
-        },
-      });
-
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Failed to create competition.");
-    } finally {
-      setLoading(false);
+    const user = getUser();
+    if (!user) {
+      setMessage("You must be logged in to create a competition.");
+      return;
     }
+
+    // Step 1: Create Jeopardy game
+    const jeopardy = await jeopardyApi.create({
+      title: formData.name,
+      categories: [],
+      author: user._id,
+    });
+
+    // Step 2: Create Competition linked to Jeopardy
+    await competitionApi.create({
+      title: formData.name,       // optional: or leave it on backend
+      jeopardyId: jeopardy._id,   // ✅ pass as an object
+      author: user._id            // optional if backend needs it
+    });
+
+    // Redirect to question creation
+    navigate(`/jeopardy/${jeopardy._id}/create-question`, {
+      state: {
+        totalCategories: Number(formData.categories),
+        questionsPerCategory: Number(formData.questions),
+      },
+    });
+
+  } catch (err) {
+    console.error(err);
+    setMessage("❌ Failed to create competition.");
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <>

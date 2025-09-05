@@ -20,6 +20,8 @@ const competitionSchema = new mongoose.Schema({
   currentQuestion: { type: mongoose.Schema.Types.ObjectId, default: null },
     answeredQuestions: [{ type: mongoose.Schema.Types.ObjectId }], // ✅ new
     round: { type: Number, default: 1 },
+    joinCode: { type: String, unique: true, required: true }, // ✅ add this
+
 }, { timestamps: true });
 
 export default mongoose.model("Competition", competitionSchema);

@@ -7,6 +7,8 @@ import ensureLoggedIn from './config/ensureLoggedIn.js';
 import userRoutes from './routes/api/users.js';
 import competitionRoutes from './routes/api/competition.js';
 import jeopardyRoutes from './routes/api/jeopardy.js'
+import joinRoutes from './routes/api/join.js';
+
 
 const app = express()
 
@@ -23,6 +25,8 @@ app.use((req, res, next) => {
 
 // API Routes - these must come before the static file serving
 app.use('/api/users', userRoutes); /* You better have this in your project */
+// Allow joining by code WITHOUT requiring login
+app.use('/api/join', joinRoutes);
 app.use('/api/competitions',checkToken, ensureLoggedIn, competitionRoutes);
 app.use('/api/jeopardies',checkToken, ensureLoggedIn, jeopardyRoutes);
 
@@ -42,5 +46,10 @@ app.get(/.*/, (req, res) => {
     }
     res.sendFile(path.resolve(path.join(__dirname, indexPath)));
 });
+
+
+// Protected competition routes (for instructor control)
+app.use('/api/competitions', checkToken, ensureLoggedIn, competitionRoutes);
+
 
 export default app; /* You better have this in your project */

@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import * as competitionApi from "../../../utilities/competition-api";
+import socket from "../../../utilities/socket";
 import styles from "./QuestionPage.module.scss";
 import DailyDouble from "./DailyDouble/DailyDouble";
 import RankingContent from "../RankingPage/RankingContent";
@@ -54,7 +55,28 @@ const fetchCompetition = async () => {
     return null;
   }
 };
+  const handleBuzz = (team) => {
+    socket.emit("buzz", { competitionId, teamId: team._id });
+  };
+  useEffect(() => {
+  socket.on("buzz-locked", ({ teamId }) => {
+    const team = competition?.teams.find((t) => t._id === teamId);
+    if (team) {
+      setTeamAnswering(team);
+      setMessage(`${team.name} buzzed first!`);
+    }
+  });
 
+  socket.on("buzz-reset", () => {
+    setTeamAnswering(null);
+    setMessage("Buzzers reset — teams may buzz again!");
+  });
+
+  return () => {
+    socket.off("buzz-locked");
+    socket.off("buzz-reset");
+  };
+}, [competition]);
 
   useEffect(() => {
     fetchCompetition();
@@ -92,6 +114,8 @@ const handleCorrect = async () => {
 
     // Set Go Back button visible
     setReadyToGoBack(true);
+    socket.emit("reset-buzz", { competitionId });
+
 
     // Optionally fetch competition **without overwriting currentQuestion**
     const updatedCompetition = await competitionApi.getById(competitionId);
@@ -127,6 +151,8 @@ const handleCorrect = async () => {
       setTeamAnswering(null); // allow next buzz
       setMessage("Teams may buzz again.");
       await fetchCompetition();
+      socket.emit("reset-buzz", { competitionId });
+
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to mark wrong.");
@@ -140,6 +166,8 @@ const handleSkip = async () => {
     // Show the answer immediately
     setAnswerShown(true);
     setTeamAnswering(null);
+    socket.emit("reset-buzz", { competitionId });
+
 
     // Update competition (scores, answered questions) WITHOUT overwriting currentQuestion
     const updatedCompetition = await competitionApi.getById(competitionId);
@@ -162,6 +190,15 @@ const handleSkip = async () => {
     setMessage("❌ Failed to skip question.");
   }
 };
+const isPlayer = !!localStorage.getItem('playerToken');
+
+{!isPlayer && (
+  <div className={styles.controls}>
+    <button onClick={handleCorrect}>Correct</button>
+    <button onClick={handleWrong}>Wrong</button>
+    <button onClick={handleSkip}>Skip</button>
+  </div>
+)}
 
 
   // ✅ if game is over, show ranking instead of question UI

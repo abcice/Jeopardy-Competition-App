@@ -1,6 +1,8 @@
 import Competition from '../../models/Competition.js';
 import Jeopardy from '../../models/Jeopardy.js';
 import Buzz from '../../models/Buzz.js';
+import { createPlayerToken } from '../../src/utilities/playerToken.js';
+
 // List all competitions
 
 
@@ -75,19 +77,21 @@ export async function show(req, res) {
 // Create a new competition
 
 export async function create(req, res) {
-    try {
-        const competition = await Competition.create({
-                  jeopardy: req.body.jeopardyId,
-                  status: "pending",
-                  teams: []
-        });
+  try {
+      const joinCode = Math.random().toString(36).substring(2, 6).toUpperCase();
 
-        res.status(201).json(competition);
-    } catch (e) {
-        res.status(400).json({ msg: e.message });
-    }
+    const competition = await Competition.create({
+      jeopardy: req.body.jeopardyId,
+      status: "pending",
+      teams: [],
+      joinCode
+    });
+
+    res.status(201).json(competition);
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
 }
-
 // Add a team
 
 export async function addTeam(req, res) {
@@ -137,7 +141,7 @@ export async function recordBuzz(req, res) {
   try {
     const buzz = await Buzz.create({
       competition: req.params.id,
-      teamId: req.body.teamId,
+      teamId: req.player.teamId,
       questionId: req.body.questionId
     });
     res.status(201).json(buzz);
@@ -320,4 +324,40 @@ export async function deleteCompetition(req, res) {
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
+}
+
+// Join competition
+export async function joinCompetition(req, res) {
+  try {
+    const competition = await Competition.findById(req.params.id);
+    if (!competition) return res.status(404).json({ msg: "Competition not found" });
+
+    res.status(200).json({
+      id: competition._id,
+      teams: competition.teams,
+      identifierType: competition.identifierType || "colors"
+    });
+  } catch (err) {
+    res.status(400).json({ msg: err.message });
+  }
+}
+
+//code
+
+
+export async function getByCode(req, res) {
+  const { joinCode } = req.params;
+  const comp = await Competition.findOne({ joinCode }).lean();
+  if (!comp) return res.status(404).json({ error: "Not found" });
+
+  // pick a team? You might want to allow them to pick a team later
+  // For now, just create a token without a team
+  const playerToken = createPlayerToken({ competitionId: comp._id, teamId: null });
+
+  res.json({
+    id: comp._id,
+    teams: comp.teams,
+    identifierType: comp.identifierType,
+    playerToken
+  });
 }

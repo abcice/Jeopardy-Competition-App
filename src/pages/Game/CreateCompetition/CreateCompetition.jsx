@@ -23,6 +23,8 @@ const location = useLocation();
   const [message, setMessage] = useState('');
   const [jeopardies, setJeopardies] = useState([]);
   const [selectedJeopardy, setSelectedJeopardy] = useState('');
+  const [joinCode, setJoinCode] = useState('');
+
 
   const jeopardyId = paramId || location.state?.jeopardyId;
 
@@ -32,31 +34,50 @@ const location = useLocation();
     'red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'teal'
   ];
 
-  const handleGenerateTeams = () => {
-    if (numTeams <= 0) {
-      setMessage('❌ Please enter a valid number of teams');
-      return;
+const handleGenerateTeams = async () => {
+  if (numTeams <= 0) {
+    setMessage('❌ Please enter a valid number of teams');
+    return;
+  }
+
+  try {
+    let id = competitionId;
+    if (!id) {
+      const competition = await competitionApi.create({ jeopardyId: selectedJeopardy });
+      id = competition._id;
+      setCompetitionId(id);
     }
 
     let generatedTeams = [];
     for (let i = 0; i < numTeams; i++) {
-      if (identifierType === 'colors') {
-        generatedTeams.push({
-          name: `Team ${i + 1}`,
-          color: availableColors[i % availableColors.length],
-          number: null,
-        });
-      } else {
-        generatedTeams.push({
-          name: `Team ${i + 1}`,
-          color: null,
-          number: i + 1,
-        });
-      }
+      generatedTeams.push({
+        name: `Team ${i + 1}`,
+        color: identifierType === 'colors' ? availableColors[i % availableColors.length] : null,
+        number: identifierType === 'numbers' ? i + 1 : null,
+      });
     }
+
+    for (const team of generatedTeams) {
+      await competitionApi.addTeam(id, team);
+    }
+
     setTeams(generatedTeams);
-    setMessage('');
-  };
+
+    // ✅ fetch the competition to get joinCode
+    const fullCompetition = await competitionApi.getById(id);
+    console.log('Full competition fetched:', fullCompetition);
+    setJoinCode(fullCompetition.competition.joinCode);
+    setMessage(`✅ Teams saved! Join code: ${fullCompetition.competition.joinCode}`);
+
+
+
+  } catch (err) {
+    console.error(err);
+    setMessage('❌ Failed to generate teams');
+  }
+};
+
+
 
   const handleSaveTeams = async () => {
   if (!selectedJeopardy) {
@@ -69,7 +90,7 @@ const location = useLocation();
 
     let id = competitionId;
     if (!id) {
-      const competition = await competitionApi.create(selectedJeopardy);
+      const competition = await competitionApi.create({ jeopardyId: selectedJeopardy });
       id = competition._id;
       setCompetitionId(id);
     }
@@ -144,6 +165,13 @@ useEffect(() => {
 
         <button onClick={handleGenerateTeams}>Generate Teams</button>
       </div>
+      {competitionId && joinCode && (
+        <div className={styles.joinCode}>
+          <p>Share this code with players:</p>
+          <code>{joinCode}</code>
+        </div>
+      )}
+
 
       {teams.length > 0 && (
         <div className={styles.teamsPreview}>

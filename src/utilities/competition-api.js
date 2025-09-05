@@ -13,9 +13,10 @@ export function getById(id) {
 }
 
 // utilities/competition-api.js
-export function create(jeopardyId) {
-  return sendRequest(BASE_URL, 'POST', { jeopardyId }); // 👈 matches controller
-}
+  export function create(payload) {
+    return sendRequest(BASE_URL, 'POST', payload);
+  }
+
 
 
 export function deleteCompetition(id) {
@@ -57,4 +58,14 @@ export function recordBuzz(id, teamId, questionId) {
 // Status
 export function updateStatus(id, status) {
   return sendRequest(`${BASE_URL}/${id}/status`, 'PUT', { status });
+}
+
+//code
+export function getByCode(code) {
+  // skipToken = true because this endpoint is public
+  return sendRequest(`/api/competitions/code/${code}`, 'GET', null, true);
+}
+
+export function getJoinCode(competitionId) {
+  return sendRequest(`/api/competitions/${competitionId}`);
 }

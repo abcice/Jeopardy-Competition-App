@@ -1,24 +1,29 @@
 import { getToken } from './users-service';
 
-export default async function sendRequest(url, method = 'GET', payload = null) {
-  // Fetch takes an optional options object as the 2nd argument
-  // used to include a data payload, set headers, etc.
+export default async function sendRequest(url, method = 'GET', payload = null, skipToken = false) {
   const options = { method };
   if (payload) {
     options.headers = { 'Content-Type': 'application/json' };
     options.body = JSON.stringify(payload);
-    console.log("Payload sent:", options.body);
   }
-  const token = getToken();
+
+if (!skipToken) {
+  const token = getToken(); // for instructors
   if (token) {
-    // Ensure headers object exists
     options.headers = options.headers || {};
-    // Add token to an Authorization header
-    // Prefacing with 'Bearer' is recommended in the HTTP specification
     options.headers.Authorization = `Bearer ${token}`;
   }
+} else {
+  // optional: playerToken
+  const playerToken = localStorage.getItem('playerToken');
+  if (playerToken) {
+    options.headers = options.headers || {};
+    options.headers.Authorization = `Bearer ${playerToken}`;
+  }
+}
+
+
   const res = await fetch(url, options);
-  // res.ok will be false if the status code set to 4xx in the controller action
   if (res.ok) return res.json();
   const errorText = await res.text();
   console.error("Fetch error: status", res.status, errorText);

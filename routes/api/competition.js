@@ -26,3 +26,9 @@ router.post('/:id/buzz', CompetitionController.recordBuzz);
 router.put('/:id/status', CompetitionController.updateStatus); 
 
 export default router;
+
+// Join competition
+router.get('/:id/join', CompetitionController.joinCompetition);
+
+router.get('/code/:joinCode', CompetitionController.getByCode); // NEW
+

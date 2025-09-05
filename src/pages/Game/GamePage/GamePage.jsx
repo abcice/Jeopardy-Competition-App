@@ -1,83 +1,84 @@
-// src/pages/Competition/GamePage/GamePage.jsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../../components/Navbar/Navbar';
 import Footer from '../../../components/Footer/Footer';
 import * as competitionApi from '../../../utilities/competition-api';
+import socket from '../../../utilities/socket';
 import styles from './GamePage.module.scss';
 
 export default function GamePage() {
   const { id: competitionId } = useParams();
   const navigate = useNavigate();
 
+  const [competition, setCompetition] = useState(null);
   const [teams, setTeams] = useState([]);
   const [selectedButtons, setSelectedButtons] = useState({});
-  const [identifierType, setIdentifierType] = useState('colors'); // default
+  const [identifierType, setIdentifierType] = useState('colors');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  
 
   const availableColors = [
     'red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'teal'
   ];
 
-  // Fetch teams and identifier type from the competition
+  // Fetch competition data once
   useEffect(() => {
-    async function fetchTeams() {
+    async function fetchCompetition() {
       try {
         const comp = await competitionApi.getById(competitionId);
         console.log("Fetched competition:", comp);
-        setIdentifierType(comp.identifierType || 'colors');
 
-        const teamsData = comp.teams || [];
-        setTeams(teamsData);
-        const { competition } = await competitionApi.getById(competitionId);
-        console.log("Fetched competition:", competition);
-        setIdentifierType(competition.identifierType || 'colors');
-        setTeams(competition.teams || []);
+        setCompetition(comp);
+        setIdentifierType(comp.identifierType || 'colors');
+        setTeams(comp.teams || []);
         setLoading(false);
       } catch (err) {
         console.error(err);
-        setMessage('❌ Failed to load teams');
+        setMessage('❌ Failed to load competition');
         setLoading(false);
       }
     }
-    fetchTeams();
+    fetchCompetition();
   }, [competitionId]);
 
   // Handle team button selection
   const handleSelect = async (teamId) => {
-    // Prevent selecting the same button twice
+    socket.emit("join-competition", { competitionId, teamId });
+
     if (selectedButtons[teamId]) return;
 
-    // Mark this button as selected
     setSelectedButtons((prev) => ({ ...prev, [teamId]: true }));
 
     try {
-      // Update team in backend to mark identifier as chosen
       await competitionApi.updateStatus(competitionId, 'identifier-selected');
     } catch (err) {
       console.error(err);
       setMessage('❌ Failed to register selection');
     }
 
-    // Check if all teams have selected
     if (Object.keys(selectedButtons).length + 1 === teams.length) {
       navigate(`/competitions/${competitionId}/board`);
     }
   };
 
-  if (loading) return <p>Loading teams...</p>;
+  if (loading || !competition) return <p>Loading teams...</p>;
 
   return (
     <div className={styles.gamePage}>
       <Navbar />
       <main>
+        <p>Share this link with players:</p>
+        <code>{`${window.location.origin}/join/${competition.joinCode}`}</code>
+
+        <p>Or tell them to enter this code:</p>
+        <code>{competition.joinCode}</code>
+
         <h1>Select Your Team Identifier</h1>
         {message && <p className={styles.message}>{message}</p>}
 
         <div className={styles.buttonsContainer}>
-          {teams.map((team, idx) => {
-            const key = identifierType === 'colors' ? team.color : team.number;
+          {teams.map((team) => {
             const disabled = !!selectedButtons[team._id];
 
             return (

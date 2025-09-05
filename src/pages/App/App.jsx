@@ -30,7 +30,6 @@ export default function App() {
         <Routes>
           {/* Dashboard */}
           <Route path="/" element={<Dashboard />} />
-
           {/* Jeopardy creation flow */}
           <Route path="/jeopardy/create" element={<CreateGame />} />
           <Route path="/jeopardy/:jeopardyId/create-question" element={<CreateQuestion />} />
@@ -46,6 +45,11 @@ export default function App() {
           <Route path="/competitions/:competitionId/board" element={<QuestionBoard />} />
           <Route path="/competitions/:competitionId/question" element={<QuestionPage />} />
           <Route path="/competitions/:competitionId/rankings" element={<RankingPage />} />
+
+
+
+          
+
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" />} />
