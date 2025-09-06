@@ -1,7 +1,7 @@
 // src/components/JoinGame/JoinGame.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import * as competitionApi from "../../utilities/competition-api";
+import * as playerCompetitionApi from "../../utilities/player-competition-api";
 
 export default function JoinGame() {
   const navigate = useNavigate();
@@ -13,25 +13,24 @@ export default function JoinGame() {
 const handleJoin = async () => {
   try {
     console.log("Joining with code:", code.trim());
-    const comp = await competitionApi.getByCode(code.trim());
+
+    // Step 1: call joinByCode to validate code and get token
+    const comp = await playerCompetitionApi.joinByCode(code.trim());
     console.log("Competition response:", comp);
 
-    // save the token
+    // Step 2: save the token immediately
     if (comp.playerToken) {
       localStorage.setItem("playerToken", comp.playerToken);
       console.log("Player token saved:", comp.playerToken);
     }
 
-    // redirect
-    navigate(`/competition/${comp.id}/setup`);
+    // Step 3: redirect player to setup page where they pick a team
+    navigate(`/competition/${comp.id}/player/setup`);
   } catch (err) {
     console.error(err);
     setError("❌ Invalid code");
   }
 };
-
-
-
 
   // Auto-join if paramCode is present in URL
   useEffect(() => {

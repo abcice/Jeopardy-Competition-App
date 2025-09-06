@@ -346,18 +346,62 @@ export async function joinCompetition(req, res) {
 
 
 export async function getByCode(req, res) {
-  const { joinCode } = req.params;
-  const comp = await Competition.findOne({ joinCode }).lean();
-  if (!comp) return res.status(404).json({ error: "Not found" });
+  try {
+    const { joinCode } = req.params;
+    const competition = await Competition.findOne({ joinCode });
 
-  // pick a team? You might want to allow them to pick a team later
-  // For now, just create a token without a team
-  const playerToken = createPlayerToken({ competitionId: comp._id, teamId: null });
+    if (!competition) {
+      return res.status(404).json({ msg: "Competition not found" });
+    }
 
-  res.json({
-    id: comp._id,
-    teams: comp.teams,
-    identifierType: comp.identifierType,
-    playerToken
-  });
+    // Create a player token with only competitionId (teamId = null for now)
+    const playerToken = createPlayerToken({
+      competitionId: competition._id,
+      teamId: null,
+    });
+
+    res.json({
+      id: competition._id,
+      name: competition.name,
+      teams: competition.teams,
+      playerToken, // 👈 send this to frontend
+    });
+  } catch (err) {
+    console.error("getByCode error:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+}
+
+// Join a team (for players)
+export async function joinTeam(req, res) {
+  try {
+    const { teamId } = req.body;
+    const { id } = req.params;
+
+    const competition = await Competition.findById(id);
+    if (!competition) {
+      return res.status(404).json({ msg: "Competition not found" });
+    }
+
+    const team = competition.teams.id(teamId);
+    if (!team) {
+      return res.status(404).json({ msg: "Team not found" });
+    }
+
+    // Issue a new token bound to this team
+    const playerToken = createPlayerToken({
+      competitionId: competition._id,
+      teamId: team._id,
+    });
+
+    res.status(200).json({
+      msg: "Joined team successfully",
+      playerToken,
+      team,
+      competitionId: competition._id,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ msg: err.message });
+  }
 }

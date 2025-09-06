@@ -59,13 +59,3 @@ export function recordBuzz(id, teamId, questionId) {
 export function updateStatus(id, status) {
   return sendRequest(`${BASE_URL}/${id}/status`, 'PUT', { status });
 }
-
-//code
-export function getByCode(code) {
-  // skipToken = true because this endpoint is public
-  return sendRequest(`/api/competitions/code/${code}`, 'GET', null, true);
-}
-
-export function getJoinCode(competitionId) {
-  return sendRequest(`/api/competitions/${competitionId}`);
-}

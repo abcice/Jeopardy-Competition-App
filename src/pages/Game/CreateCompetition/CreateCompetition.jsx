@@ -35,8 +35,13 @@ const location = useLocation();
   ];
 
 const handleGenerateTeams = async () => {
+  if (!selectedJeopardy) {
+    setMessage("❌ Please select a Jeopardy game first");
+    return;
+  }
+
   if (numTeams <= 0) {
-    setMessage('❌ Please enter a valid number of teams');
+    setMessage("❌ Please enter a valid number of teams");
     return;
   }
 
@@ -52,8 +57,8 @@ const handleGenerateTeams = async () => {
     for (let i = 0; i < numTeams; i++) {
       generatedTeams.push({
         name: `Team ${i + 1}`,
-        color: identifierType === 'colors' ? availableColors[i % availableColors.length] : null,
-        number: identifierType === 'numbers' ? i + 1 : null,
+        color: identifierType === "colors" ? availableColors[i % availableColors.length] : null,
+        number: identifierType === "numbers" ? i + 1 : null,
       });
     }
 
@@ -63,19 +68,16 @@ const handleGenerateTeams = async () => {
 
     setTeams(generatedTeams);
 
-    // ✅ fetch the competition to get joinCode
     const fullCompetition = await competitionApi.getById(id);
-    console.log('Full competition fetched:', fullCompetition);
     setJoinCode(fullCompetition.competition.joinCode);
+    console.log('Full competition fetched:', fullCompetition);
     setMessage(`✅ Teams saved! Join code: ${fullCompetition.competition.joinCode}`);
-
-
-
   } catch (err) {
     console.error(err);
-    setMessage('❌ Failed to generate teams');
+    setMessage("❌ Failed to generate teams");
   }
 };
+
 
 
 

@@ -7,7 +7,8 @@ import ensureLoggedIn from './config/ensureLoggedIn.js';
 import userRoutes from './routes/api/users.js';
 import competitionRoutes from './routes/api/competition.js';
 import jeopardyRoutes from './routes/api/jeopardy.js'
-import joinRoutes from './routes/api/join.js';
+import playerCompetitionRoutes  from './routes/api/playerCompetitions.js';
+import checkPlayerToken from './config/checkPlayerToken.js';
 
 
 const app = express()
@@ -24,11 +25,14 @@ app.use((req, res, next) => {
 })/* You better have this in your project */
 
 // API Routes - these must come before the static file serving
+app.use('/api/player/competitions', playerCompetitionRoutes);
 app.use('/api/users', userRoutes); /* You better have this in your project */
 // Allow joining by code WITHOUT requiring login
-app.use('/api/join', joinRoutes);
+app.use('/api/join', playerCompetitionRoutes);
 app.use('/api/competitions',checkToken, ensureLoggedIn, competitionRoutes);
 app.use('/api/jeopardies',checkToken, ensureLoggedIn, jeopardyRoutes);
+app.use('/api/player/competitions', checkPlayerToken, playerCompetitionRoutes);
+
 
 // Determine which directory to serve static files from /* You better have this in your project */
 const staticDir = process.env.NODE_ENV === 'production' ? 'dist' : 'public';
@@ -48,8 +52,6 @@ app.get(/.*/, (req, res) => {
 });
 
 
-// Protected competition routes (for instructor control)
-app.use('/api/competitions', checkToken, ensureLoggedIn, competitionRoutes);
 
 
 export default app; /* You better have this in your project */

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import styles from "./App.module.scss";
 import { getUser } from "../../utilities/users-service";
@@ -16,43 +16,81 @@ import EditCompetition from "../Create/EditCompetition/EditCompetition";
 
 // Competition setup & game flow
 import CreateCompetition from "../Game/CreateCompetition/CreateCompetition";
-import GamePage from "../Game/GamePage/GamePage";
+import InstructorGamePage from "../Game/GamePage/InstructorGamePage";
 import QuestionBoard from "../Game/QuestionBoard/QuestionBoard";
-import QuestionPage from "../Game/QuestionPage/QuestionPage";
+import InstructorQuestionPage from "../Game/QuestionPage/InstructorQuestionPage";
+import PlayerQuestionPage from "../Game/QuestionPage/PlayerQuestionPage";
 import RankingPage from "../Game/RankingPage/RankingPage";
+import PlayerGamePage from "../Game/GamePage/PlayerGamePage";
+
 
 export default function App() {
+  // Instructor/admin user (token)
   const [user, setUser] = useState(getUser());
+
+  // Player (playerToken)
+  const [playerToken] = useState(localStorage.getItem("playerToken"));
+
+  // Either one means we are authenticated
+  const isAuthenticated = user || playerToken;
 
   return (
     <main className={styles.App}>
-      {user ? (
+      {isAuthenticated ? (
         <Routes>
-          {/* Dashboard */}
-          <Route path="/" element={<Dashboard />} />
-          {/* Jeopardy creation flow */}
-          <Route path="/jeopardy/create" element={<CreateGame />} />
-          <Route path="/jeopardy/:jeopardyId/create-question" element={<CreateQuestion />} />
-          <Route path="/jeopardy/:jeopardyId/import-question" element={<ImportQuestion />} />
-          <Route path="/jeopardy/edit" element={<EditJeopardy />} />
-          <Route path="/jeopardy/edit/:jeopardyId" element={<EditCompetition />} />
+          {/* Instructor dashboard */}
+          {user && <Route path="/" element={<Dashboard />} />}
 
-          {/* Competition setup */}
-          <Route path="/competition/start" element={<CreateCompetition />} />
-          <Route path="/competition/:id/setup" element={<GamePage />} />
+          {/* Game flow (shared between instructor + players) */}
+          <Route path="/competition/:id/setup" element={<InstructorGamePage />} />
+          <Route path="/competition/:id/player/setup" element={<PlayerGamePage />} />
 
-          {/* Competition gameplay */}
-          <Route path="/competitions/:competitionId/board" element={<QuestionBoard />} />
-          <Route path="/competitions/:competitionId/question" element={<QuestionPage />} />
-          <Route path="/competitions/:competitionId/rankings" element={<RankingPage />} />
+          <Route
+            path="/competitions/:competitionId/board"
+            element={<QuestionBoard />}
+          />
+          <Route
+            path="/competitions/:competitionId/question/instructor"
+            element={<InstructorQuestionPage />}
+          />
+          <Route
+            path="/competitions/:competitionId/question/player"
+            element={<PlayerQuestionPage />}
+          />
 
+          <Route
+            path="/competitions/:competitionId/rankings"
+            element={<RankingPage />}
+          />
 
+          {/* Jeopardy creation (only instructors) */}
+          {user && (
+            <>
+              <Route path="/jeopardy/create" element={<CreateGame />} />
+              <Route
+                path="/jeopardy/:jeopardyId/create-question"
+                element={<CreateQuestion />}
+              />
+              <Route
+                path="/jeopardy/:jeopardyId/import-question"
+                element={<ImportQuestion />}
+              />
+              <Route path="/jeopardy/edit" element={<EditJeopardy />} />
+              <Route
+                path="/jeopardy/edit/:jeopardyId"
+                element={<EditCompetition />}
+              />
+              <Route path="/competition/start" element={<CreateCompetition />} />
+            </>
+          )}
 
-          
-
-
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" />} />
+          {/* Default fallback */}
+          <Route
+            path="*"
+            element={
+              user ? <Navigate to="/" /> : <Navigate to="/competition/:id/setup" />
+            }
+          />
         </Routes>
       ) : (
         <AuthPage setUser={setUser} />
