@@ -1,4 +1,5 @@
-import { useState } from "react";
+// src/pages/App/App.jsx
+import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import styles from "./App.module.scss";
 import { getUser } from "../../utilities/users-service";
@@ -23,15 +24,27 @@ import PlayerQuestionPage from "../Game/QuestionPage/PlayerQuestionPage";
 import RankingPage from "../Game/RankingPage/RankingPage";
 import PlayerGamePage from "../Game/GamePage/PlayerGamePage";
 
-
 export default function App() {
   // Instructor/admin user (token)
   const [user, setUser] = useState(getUser());
+  const [playerToken, setPlayerToken] = useState(localStorage.getItem("playerToken"));
 
-  // Player (playerToken)
-  const [playerToken] = useState(localStorage.getItem("playerToken"));
+  // Validate playerToken
+  useEffect(() => {
+    if (playerToken) {
+      try {
+        const payload = JSON.parse(atob(playerToken.split(".")[1]));
+        if (!payload.competitionId) {
+          localStorage.removeItem("playerToken");
+          setPlayerToken(null);
+        }
+      } catch (e) {
+        localStorage.removeItem("playerToken");
+        setPlayerToken(null);
+      }
+    }
+  }, [playerToken]);
 
-  // Either one means we are authenticated
   const isAuthenticated = user || playerToken;
 
   return (
@@ -41,14 +54,10 @@ export default function App() {
           {/* Instructor dashboard */}
           {user && <Route path="/" element={<Dashboard />} />}
 
-          {/* Game flow (shared between instructor + players) */}
+          {/* Game flow (shared) */}
           <Route path="/competition/:id/setup" element={<InstructorGamePage />} />
           <Route path="/competition/:id/player/setup" element={<PlayerGamePage />} />
-
-          <Route
-            path="/competitions/:competitionId/board"
-            element={<QuestionBoard />}
-          />
+          <Route path="/competitions/:competitionId/board" element={<QuestionBoard />} />
           <Route
             path="/competitions/:competitionId/question/instructor"
             element={<InstructorQuestionPage />}
@@ -57,11 +66,7 @@ export default function App() {
             path="/competitions/:competitionId/question/player"
             element={<PlayerQuestionPage />}
           />
-
-          <Route
-            path="/competitions/:competitionId/rankings"
-            element={<RankingPage />}
-          />
+          <Route path="/competitions/:competitionId/rankings" element={<RankingPage />} />
 
           {/* Jeopardy creation (only instructors) */}
           {user && (
@@ -88,12 +93,20 @@ export default function App() {
           <Route
             path="*"
             element={
-              user ? <Navigate to="/" /> : <Navigate to="/competition/:id/setup" />
+              user
+                ? <Navigate to="/" />
+                : playerToken
+                  ? <Navigate to="/competition/:id/player/setup" />
+                  : <Navigate to="/auth" />
             }
           />
         </Routes>
       ) : (
-        <AuthPage setUser={setUser} />
+        <Routes>
+          {/* Unauthenticated → AuthPage (handles login/signup + join game) */}
+          <Route path="/auth" element={<AuthPage setUser={setUser} />} />
+          <Route path="*" element={<Navigate to="/auth" />} />
+        </Routes>
       )}
     </main>
   );

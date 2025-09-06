@@ -1,7 +1,7 @@
 import Competition from '../../models/Competition.js';
 import Jeopardy from '../../models/Jeopardy.js';
 import Buzz from '../../models/Buzz.js';
-import { createPlayerToken } from '../../src/utilities/playerToken.js';
+import { createPlayerToken } from '../../config/playerToken.js';
 
 // List all competitions
 

@@ -1,4 +1,4 @@
-import { verifyPlayerToken } from '../src/utilities/playerToken.js';
+import { verifyPlayerToken } from './playerToken.js';
 
 export default (req, res, next) => {
   let token = req.get('Authorization');

@@ -12,23 +12,16 @@ export default function JoinGame() {
 
 const handleJoin = async () => {
   try {
-    console.log("Joining with code:", code.trim());
-
-    // Step 1: call joinByCode to validate code and get token
+    console.log("Joining with code:", code);
     const comp = await playerCompetitionApi.joinByCode(code.trim());
     console.log("Competition response:", comp);
 
-    // Step 2: save the token immediately
-    if (comp.playerToken) {
-      localStorage.setItem("playerToken", comp.playerToken);
-      console.log("Player token saved:", comp.playerToken);
-    }
+    localStorage.setItem("playerToken", comp.playerToken);
+    console.log("Player token saved:", comp.playerToken);
 
-    // Step 3: redirect player to setup page where they pick a team
     navigate(`/competition/${comp.id}/player/setup`);
   } catch (err) {
-    console.error(err);
-    setError("❌ Invalid code");
+    console.error("Failed to join competition", err);
   }
 };
 

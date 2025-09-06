@@ -8,6 +8,7 @@ import userRoutes from './routes/api/users.js';
 import competitionRoutes from './routes/api/competition.js';
 import jeopardyRoutes from './routes/api/jeopardy.js'
 import playerCompetitionRoutes  from './routes/api/playerCompetitions.js';
+import playerPublicRoutes from './routes/api/playerPublic.js';
 import checkPlayerToken from './config/checkPlayerToken.js';
 
 
@@ -24,14 +25,15 @@ app.use((req, res, next) => {
     next()
 })/* You better have this in your project */
 
-// API Routes - these must come before the static file serving
-app.use('/api/player/competitions', playerCompetitionRoutes);
+// ✅ Public join route (no token needed)
+app.use("/api/player/public", playerPublicRoutes);
 app.use('/api/users', userRoutes); /* You better have this in your project */
 // Allow joining by code WITHOUT requiring login
-app.use('/api/join', playerCompetitionRoutes);
 app.use('/api/competitions',checkToken, ensureLoggedIn, competitionRoutes);
 app.use('/api/jeopardies',checkToken, ensureLoggedIn, jeopardyRoutes);
-app.use('/api/player/competitions', checkPlayerToken, playerCompetitionRoutes);
+// ✅ Player competition routes (protected by token inside router)
+
+app.use('/api/player/competitions', playerCompetitionRoutes);
 
 
 // Determine which directory to serve static files from /* You better have this in your project */
