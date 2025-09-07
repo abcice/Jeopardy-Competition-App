@@ -358,7 +358,7 @@ export async function getByCode(req, res) {
     const playerToken = createPlayerToken({
       competitionId: competition._id,
       teamId: null,
-    });
+    }, );
 
     res.json({
       id: competition._id,
