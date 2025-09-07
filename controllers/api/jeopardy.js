@@ -3,7 +3,7 @@ import Jeopardy from '../../models/Jeopardy.js';
 // List all Jeopardy games
 export async function index(req, res) {
   try {
-    const jeopardies = await Jeopardy.find({}).populate('author');
+    const jeopardies = await Jeopardy.find({author: req.user._id}).populate('author');
     res.status(200).json(jeopardies);
   } catch (e) {
     res.status(400).json({ msg: e.message });
@@ -14,7 +14,7 @@ export async function index(req, res) {
 export async function create(req, res) {
   try {
     const { title, categories, author } = req.body;
-    const jeopardy = await Jeopardy.create({ title, categories, author });
+    const jeopardy = await Jeopardy.create({ title, categories, author: req.user._id, });
     res.status(201).json(jeopardy);
   } catch (e) {
     res.status(400).json({ msg: e.message });
@@ -28,7 +28,7 @@ export async function update(req, res) {
   try {
     const { title, categories } = req.body;
     const jeopardy = await Jeopardy.findByIdAndUpdate(
-      req.params.id,
+      { _id: req.params.id, author: req.user._id },
       { title, categories },
       { new: true, runValidators: true }
     );
@@ -43,7 +43,8 @@ export async function update(req, res) {
 // Delete a Jeopardy game
 export async function deleteJeopardy(req, res) {
   try {
-    const jeopardy = await Jeopardy.findByIdAndDelete(req.params.id);
+    const jeopardy = await Jeopardy.findByIdAndDelete({_id: req.params.id,
+      author: req.user._id,});
     if (!jeopardy) return res.status(404).json({ msg: "Jeopardy not found" });
     res.status(200).json({ msg: "Jeopardy deleted successfully" });
   } catch (e) {
