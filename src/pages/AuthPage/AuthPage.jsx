@@ -5,7 +5,7 @@ import LoginForm from "../../components/LoginForm/LoginForm";
 import SignUpForm from "../../components/SignUpForm/SignUpForm";
 import JoinGame from "../../components/JoinGame/JoinGame";
 
-export default function AuthPage({ setUser }) {
+export default function AuthPage({ setUser, setPlayerToken }) {
   const [showLogin, setShowLogin] = useState(true);
 
   return (
@@ -20,7 +20,7 @@ export default function AuthPage({ setUser }) {
           {showLogin ? <LoginForm setUser={setUser} /> : <SignUpForm setUser={setUser} />}
         </div>
         <div className={styles.joinGameSection}>
-          <JoinGame />
+          <JoinGame setPlayerToken={setPlayerToken} />
         </div>
       </div>
     </main>

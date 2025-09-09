@@ -24,90 +24,60 @@ import PlayerQuestionPage from "../Game/QuestionPage/PlayerQuestionPage";
 import RankingPage from "../Game/RankingPage/RankingPage";
 import PlayerGamePage from "../Game/GamePage/PlayerGamePage";
 
-export default function App() {
-  // Instructor/admin user (token)
-  const [user, setUser] = useState(getUser());
-  const [playerToken, setPlayerToken] = useState(localStorage.getItem("playerToken"));
-
-  // Validate playerToken
-  useEffect(() => {
-    if (playerToken) {
-      try {
-        const payload = JSON.parse(atob(playerToken.split(".")[1]));
-        if (!payload.competitionId) {
-          localStorage.removeItem("playerToken");
-          setPlayerToken(null);
-        }
-      } catch (e) {
-        localStorage.removeItem("playerToken");
-        setPlayerToken(null);
-      }
+function getValidPlayerToken() {
+  const token = localStorage.getItem("playerToken");
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (!payload.competitionId || payload.exp < Date.now() / 1000) {
+      localStorage.removeItem("playerToken");
+      return null;
     }
-  }, [playerToken]);
+    return token;
+  } catch (e) {
+    localStorage.removeItem("playerToken");
+    return null;
+  }
+}
 
-  const isAuthenticated = user || playerToken;
+export default function App() {
+  const [user, setUser] = useState(getUser());
+  const [playerToken, setPlayerToken] = useState(getValidPlayerToken());
+
+  const isAuthenticated = !!user || !!playerToken;
+
+  // ✅ Debug console log
+  console.log("App Render:", { user, playerToken, isAuthenticated });
 
   return (
     <main className={styles.App}>
-      {isAuthenticated ? (
-        <Routes>
-          {/* Instructor dashboard */}
-          {user && <Route path="/" element={<Dashboard />} />}
+      <Routes>
+        {/* Authenticated routes */}
+        {isAuthenticated && user && <Route path="/" element={<Dashboard />} />}
+        {isAuthenticated && <Route path="/competition/:id/setup" element={<InstructorGamePage />} />}
+        {isAuthenticated && <Route path="/competition/:id/player/setup" element={<PlayerGamePage playerToken={playerToken} />} />}
+        {isAuthenticated && <Route path="/competitions/:competitionId/board" element={<QuestionBoard />} />}
+        {isAuthenticated && <Route path="/competitions/:competitionId/question/instructor" element={<InstructorQuestionPage />} />}
+        {isAuthenticated && <Route path="/competitions/:competitionId/question/player" element={<PlayerQuestionPage />} />}
+        {isAuthenticated && <Route path="/competitions/:competitionId/rankings" element={<RankingPage />} />}
 
-          {/* Game flow (shared) */}
-          <Route path="/competition/:id/setup" element={<InstructorGamePage />} />
-          <Route path="/competition/:id/player/setup" element={<PlayerGamePage />} />
-          <Route path="/competitions/:competitionId/board" element={<QuestionBoard />} />
-          <Route
-            path="/competitions/:competitionId/question/instructor"
-            element={<InstructorQuestionPage />}
-          />
-          <Route
-            path="/competitions/:competitionId/question/player"
-            element={<PlayerQuestionPage />}
-          />
-          <Route path="/competitions/:competitionId/rankings" element={<RankingPage />} />
+        {isAuthenticated && user && (
+          <>
+            <Route path="/jeopardy/create" element={<CreateGame />} />
+            <Route path="/jeopardy/:jeopardyId/create-question" element={<CreateQuestion />} />
+            <Route path="/jeopardy/:jeopardyId/import-question" element={<ImportQuestion />} />
+            <Route path="/jeopardy/edit" element={<EditJeopardy />} />
+            <Route path="/jeopardy/edit/:jeopardyId" element={<EditCompetition />} />
+            <Route path="/competition/start" element={<CreateCompetition />} />
+          </>
+        )}
 
-          {/* Jeopardy creation (only instructors) */}
-          {user && (
-            <>
-              <Route path="/jeopardy/create" element={<CreateGame />} />
-              <Route
-                path="/jeopardy/:jeopardyId/create-question"
-                element={<CreateQuestion />}
-              />
-              <Route
-                path="/jeopardy/:jeopardyId/import-question"
-                element={<ImportQuestion />}
-              />
-              <Route path="/jeopardy/edit" element={<EditJeopardy />} />
-              <Route
-                path="/jeopardy/edit/:jeopardyId"
-                element={<EditCompetition />}
-              />
-              <Route path="/competition/start" element={<CreateCompetition />} />
-            </>
-          )}
+        {/* Auth page for unauthenticated users */}
+        {!user && <Route path="/auth" element={<AuthPage setUser={setUser} setPlayerToken={setPlayerToken} />} />}
 
-          {/* Default fallback */}
-          <Route
-            path="*"
-            element={
-              user
-                ? <Navigate to="/" />
-                : playerToken
-                  ? <Navigate to="/competition/:id/player/setup" />
-                  : <Navigate to="/auth" />
-            }
-          />
-        </Routes>
-      ) : (
-        <Routes>
-          {/* Unauthenticated → AuthPage (handles login/signup + join game) */}
-          <Route path="/auth" element={<AuthPage setUser={setUser} />} />
-          <Route path="*" element={<Navigate to="/auth" />} />
-        </Routes>
-      )}
+        {/* Fallback */}
+        <Route path="*" element={!user ? <Navigate to="/auth" /> : <Navigate to="/" />} />
+      </Routes>
     </main>
   );
 }

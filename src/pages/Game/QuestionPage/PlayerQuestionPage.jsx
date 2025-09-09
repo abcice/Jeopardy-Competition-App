@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import * as playerApi from "../../../utilities/player-competition-api";
-import socket from "../../../utilities/socket";
+import socket from "../../../../socket";
 import styles from "./QuestionPage.module.scss";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
 import BuzzButton from "../../../components/BuzzButton/BuzzButton";
