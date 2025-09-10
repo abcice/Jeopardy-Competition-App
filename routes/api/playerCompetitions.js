@@ -1,5 +1,5 @@
 import express from "express";
-import * as CompetitionController from "../../controllers/api/Competition.js";
+import * as CompetitionController from "../../controllers/api/competition.js";
 import checkPlayerToken from "../../config/checkPlayerToken.js";
 
 const router = express.Router();

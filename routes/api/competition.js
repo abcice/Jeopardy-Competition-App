@@ -1,5 +1,5 @@
 import express from 'express';
-import * as CompetitionController from '../../controllers/api/Competition.js';
+import * as CompetitionController from '../../controllers/api/competition.js';
 
 const router = express.Router();
 
@@ -31,4 +31,3 @@ export default router;
 router.get('/:id/join', CompetitionController.joinCompetition);
 
 router.get('/code/:joinCode', CompetitionController.getByCode); // NEW
-
