@@ -1,5 +1,5 @@
 // pages/Game/PlayerGamePage.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
@@ -8,7 +8,7 @@ import socket from "../../../utilities/socket";
 import { jwtDecode } from "jwt-decode";
 import styles from "./GamePage.module.scss";
 
-export default function PlayerGamePage({ playerToken }) {
+export default function PlayerGamePage({ playerToken, setPlayerToken }) {
   const { id: competitionId } = useParams();
   const navigate = useNavigate();
 
@@ -19,11 +19,14 @@ export default function PlayerGamePage({ playerToken }) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  // Fetch competition
+  // --- Fetch competition ---
   useEffect(() => {
     async function fetchCompetition() {
       try {
-        const comp = await playerCompetitionApi.getCompetition(competitionId, playerToken);
+        const comp = await playerCompetitionApi.getCompetition(
+          competitionId,
+          playerToken
+        );
         setCompetition(comp);
         setIdentifierType(comp.identifierType || "colors");
         setTeams(comp.teams || []);
@@ -37,81 +40,104 @@ export default function PlayerGamePage({ playerToken }) {
     if (playerToken) fetchCompetition();
   }, [competitionId, playerToken]);
 
-  // Socket setup
+  // --- Stable socket handlers ---
+  const handleConnect = useCallback(() => {
+    console.log("✅ Player socket connected:", socket.id);
+    socket.emit("join-competition", { competitionId, role: "player" });
+  }, [competitionId]);
+
+  const handleCompetitionUpdate = useCallback((data) => {
+    console.log("📢 Player received competition update:", data);
+
+    // Update competition state safely
+    setCompetition((prev) => ({ ...prev, ...data }));
+
+    // Update teams only if data includes them
+    if (data.teams) setTeams(data.teams);
+  }, []);
+
+  const handleQuestionChosen = useCallback(
+    (question) => {
+      console.log("🚀 Instructor chose question:", question);
+      navigate(`/competitions/${competitionId}/question/player`, {
+        state: { question },
+      });
+    },
+    [competitionId, navigate]
+  );
+
+  // --- Socket setup ---
   useEffect(() => {
     if (!competitionId) return;
+    if (!socket.connected) socket.connect();
 
-    console.log("🎮 Player connecting to socket, competitionId:", competitionId);
-    socket.emit("join-competition", { competitionId, role: "player" });
-
-    socket.on("connect", () => {
-      console.log("✅ Player socket connected:", socket.id);
-    });
-
-    socket.on("competition-updated", (updatedCompetition) => {
-      console.log("📢 Competition updated:", updatedCompetition);
-      setCompetition(updatedCompetition);
-      setTeams(updatedCompetition.teams || []);
-    });
-
-    // Instructor chooses a question
-    socket.on("question-chosen", (question) => {
-      console.log("🚀 Instructor chose question:", question);
-      navigate(`/competitions/${competitionId}/question/player`, { state: { question } });
-    });
+    socket.on("connect", handleConnect);
+    socket.on("competition-updated", handleCompetitionUpdate);
+    socket.on("question-chosen", handleQuestionChosen);
 
     return () => {
-      socket.off("connect");
-      socket.off("competition-updated");
-      socket.off("question-chosen");
+      socket.off("connect", handleConnect);
+      socket.off("competition-updated", handleCompetitionUpdate);
+      socket.off("question-chosen", handleQuestionChosen);
     };
-  }, [competitionId, navigate]);
+  }, [competitionId, handleConnect, handleCompetitionUpdate, handleQuestionChosen]);
 
-  // Handle selecting a team
+  // --- Team select handler ---
   const handleSelect = async (teamId) => {
-    if (selectedButtons[teamId]) return;
-
     console.log("📌 Player selecting team:", teamId);
+
     socket.emit("join-competition", { competitionId, role: "player", teamId });
 
     try {
-      const data = await playerCompetitionApi.joinTeam(competitionId, teamId);
+      const data = await playerCompetitionApi.joinTeam(
+        competitionId,
+        teamId
+      );
 
       if (data.playerToken) {
         localStorage.setItem("playerToken", data.playerToken);
-        console.log("💾 Saved playerToken:", data.playerToken);
-        const decoded = jwtDecode(data.playerToken);
-        console.log("🔑 Decoded token:", decoded);
+        setPlayerToken(data.playerToken);
       }
 
+      // Update selected buttons UI
       setSelectedButtons((prev) => ({ ...prev, [teamId]: true }));
+
+      // Update local teams state safely
+      setTeams((prevTeams) =>
+        prevTeams.map((t) =>
+          t._id === teamId
+            ? { ...t, members: [...(t.members || []), playerToken] }
+            : t
+        )
+      );
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to register selection");
     }
   };
 
+  // --- Render ---
   if (loading || !competition) return <p>Loading competition...</p>;
 
   const playerTokenPayload = jwtDecode(playerToken);
-  const joinedTeam = (competition.teams || []).find(
-    (t) => t._id === playerTokenPayload.teamId
-  );
+  const joinedTeam = teams.find((t) => t._id === playerTokenPayload.teamId);
+  const isTaken = (team) => (team.members?.length || 0) > 0;
 
   return (
     <div className={styles.gamePage}>
       <Navbar />
       <main>
         <h1>Select Your Team Identifier</h1>
-
         {message && <p className={styles.message}>{message}</p>}
 
         {joinedTeam ? (
-          <p>✅ You joined team: {joinedTeam.name}. Waiting for the instructor to start...</p>
+          <p>
+            ✅ You joined team: {joinedTeam.name}. Waiting for the instructor to start...
+          </p>
         ) : (
           <div className={styles.buttonsContainer}>
             {teams.map((team) => {
-              const disabled = !!selectedButtons[team._id];
+              const taken = isTaken(team);
               return (
                 <button
                   key={team._id}
@@ -119,13 +145,31 @@ export default function PlayerGamePage({ playerToken }) {
                   style={{
                     backgroundColor: identifierType === "colors" ? team.color : undefined,
                     color: identifierType === "colors" ? "white" : "black",
-                    cursor: disabled ? "not-allowed" : "pointer",
-                    opacity: disabled ? 0.5 : 1,
+                    cursor: taken ? "not-allowed" : "pointer",
+                    opacity: taken ? 0.7 : 1,
+                    position: "relative",
                   }}
-                  disabled={disabled}
-                  onClick={() => handleSelect(team._id)}
+                  onClick={() => !taken && handleSelect(team._id)}
                 >
                   {identifierType === "colors" ? team.color : `#${team.number}`}
+                  {taken && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        fontSize: "0.8rem",
+                        fontWeight: "bold",
+                        color: "black",
+                        background: "rgba(255,255,255,0.7)",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      TAKEN
+                    </span>
+                  )}
                 </button>
               );
             })}

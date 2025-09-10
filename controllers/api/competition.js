@@ -2,6 +2,8 @@ import Competition from '../../models/Competition.js';
 import Jeopardy from '../../models/Jeopardy.js';
 import Buzz from '../../models/Buzz.js';
 import { createPlayerToken } from '../../config/playerToken.js';
+import jwt from 'jsonwebtoken';
+
 
 // List all competitions
 
@@ -373,35 +375,13 @@ export async function getByCode(req, res) {
 }
 
 // Join a team (for players)
-export async function joinTeam(req, res) {
-  try {
-    const { teamId } = req.body;
-    const { id } = req.params;
+export async function joinTeam(competitionId, teamId, socketId) {
+  const res = await fetch(`${API_URL}/player/competitions/${competitionId}/join-team`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("playerToken")}` },
+    body: JSON.stringify({ teamId, socketId }),
+  });
 
-    const competition = await Competition.findById(id);
-    if (!competition) {
-      return res.status(404).json({ msg: "Competition not found" });
-    }
-
-    const team = competition.teams.id(teamId);
-    if (!team) {
-      return res.status(404).json({ msg: "Team not found" });
-    }
-
-    // Issue a new token bound to this team
-    const playerToken = createPlayerToken({
-      competitionId: competition._id,
-      teamId: team._id,
-    });
-
-    res.status(200).json({
-      msg: "Joined team successfully",
-      playerToken,
-      team,
-      competitionId: competition._id,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ msg: err.message });
-  }
+  if (!res.ok) throw new Error((await res.json()).msg);
+  return res.json();
 }
