@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import * as playerCompetitionApi from "../../../utilities/player-competition-api";
-import socket from "../../../utilities/socket";
+import socket from "../../../../socket";
 import { jwtDecode } from "jwt-decode";
 import styles from "./GamePage.module.scss";
 

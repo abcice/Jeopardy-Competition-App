@@ -1,5 +1,5 @@
 // pages/Game/InstructorGamePage.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
@@ -12,16 +12,18 @@ export default function InstructorGamePage() {
   const navigate = useNavigate();
 
   const [competition, setCompetition] = useState(null);
+  const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  // Initial fetch
+  // --- Initial fetch ---
   useEffect(() => {
     async function fetchCompetition() {
       try {
         const comp = await competitionApi.getById(competitionId);
         const c = comp.competition || comp;
         setCompetition(c);
+        setTeams(c.teams || []);
         setLoading(false);
 
         if (c.status === "active") {
@@ -36,38 +38,39 @@ export default function InstructorGamePage() {
     fetchCompetition();
   }, [competitionId, navigate]);
 
-  // Socket setup
+  // --- Stable socket handlers ---
+  const handleConnect = useCallback(() => {
+    console.log("✅ Instructor socket connected:", socket.id);
+    socket.emit("join-competition", { competitionId, role: "instructor" });
+  }, [competitionId]);
+
+  const handleCompetitionUpdate = useCallback((data) => {
+    console.log("📢 Instructor received competition update:", data);
+
+    if (data.teams) {
+      setTeams(data.teams);
+    }
+    setCompetition((prev) => ({ ...prev, ...data }));
+  }, []);
+
+  // --- Socket setup ---
   useEffect(() => {
     if (!competitionId) return;
+    if (!socket.connected) socket.connect();
 
-    console.log("👨‍🏫 Instructor connecting to socket, competitionId:", competitionId);
-    socket.emit("join-competition", { competitionId, role: "instructor" });
-
-    socket.on("connect", () => {
-      console.log("✅ Instructor socket connected:", socket.id);
-    });
-
-    socket.on("player-joined", (updatedCompetition) => {
-      console.log("🎮 Player joined:", updatedCompetition);
-      setCompetition(updatedCompetition);
-    });
-
-    // Optional: instructor chooses a question
-    socket.on("competition-started", () => {
-      console.log("🚀 Competition started, redirecting to board...");
-      navigate(`/competitions/${competitionId}/board`);
-    });
+    socket.on("connect", handleConnect);
+    socket.on("competition-updated", handleCompetitionUpdate);
 
     return () => {
-      socket.off("connect");
-      socket.off("player-joined");
-      socket.off("competition-started");
+      socket.off("connect", handleConnect);
+      socket.off("competition-updated", handleCompetitionUpdate);
     };
-  }, [competitionId, navigate]);
+  }, [competitionId, handleConnect, handleCompetitionUpdate]);
 
+  // --- Render ---
   if (loading || !competition) return <p>Loading competition...</p>;
 
-  const joinedCount = competition.teams.reduce((acc, t) => acc + t.members.length, 0);
+  const joinedCount = teams.reduce((acc, t) => acc + (t.members?.length || 0), 0);
 
   return (
     <div className={styles.gamePage}>
@@ -81,16 +84,20 @@ export default function InstructorGamePage() {
 
         <h2>Teams</h2>
         <ul>
-          {competition.teams.map((t) => (
+          {teams.map((t) => (
             <li key={t._id}>
               {t.name || "Unnamed"} –{" "}
-              {competition.identifierType === "colors" ? t.color : `#${t.number}`}{" "}
-              ({t.members.length > 0 ? "✅ joined" : "❌ empty"})
+              {competition.identifierType === "colors"
+                ? t.color
+                : `#${t.number}`}{" "}
+              ({t.members?.length > 0 ? "✅ joined" : "❌ empty"})
             </li>
           ))}
         </ul>
 
-        <p>Waiting for players... ({joinedCount}/{competition.teams.length})</p>
+        <p>
+          Waiting for players... ({joinedCount}/{teams.length})
+        </p>
       </main>
       <Footer />
     </div>

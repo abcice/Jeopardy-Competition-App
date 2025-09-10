@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import socket from "../../utilities/socket"; // ✅ import socket
 import * as playerCompetitionApi from "../../utilities/player-competition-api";
 
 const JoinGame = ({ setPlayerToken }) => {
@@ -10,29 +11,33 @@ const JoinGame = ({ setPlayerToken }) => {
   const [error, setError] = useState("");
   const [localPlayerToken, setLocalPlayerToken] = useState("");
 
-  // Step 1: Fetch competition by join code
   const handleFetchCompetition = async () => {
-    try {
-      const data = await playerCompetitionApi.joinByCode(joinCode);
-      setCompetition(data);
-      const token = data.playerToken;
-      setPlayerToken(token);
-      setLocalPlayerToken(token);
-      setError("");
-    } catch (err) {
-      setError(err.message || "Error fetching competition");
-      setCompetition(null);
-    }
-  };
+  try {
+    const data = await playerCompetitionApi.joinByCode(joinCode);
+    setCompetition(data);
+    const token = data.playerToken;
+    setPlayerToken(token); // save token
+    localStorage.setItem("playerToken", token);
+    setError("");
 
-  // Step 2: Join selected team
+    // Navigate to PlayerGamePage immediately
+    navigate(`/competition/${data.id}/player/setup`);
+  } catch (err) {
+    setError(err.message || "Error fetching competition");
+    setCompetition(null);
+  }
+};
+
+
   const handleJoinTeam = async () => {
-    if (!selectedTeamId) {
-      setError("Please select a team");
-      return;
-    }
+    if (!selectedTeamId) return setError("Please select a team");
     try {
-      const data = await playerCompetitionApi.joinTeam(competition.id, selectedTeamId);
+      const socketId = socket.id; // ✅ make sure socket is connected
+      const data = await playerCompetitionApi.joinTeam(
+        competition.id,
+        selectedTeamId,
+        socketId
+      );
 
       localStorage.setItem("playerToken", data.playerToken);
       setPlayerToken(data.playerToken);
