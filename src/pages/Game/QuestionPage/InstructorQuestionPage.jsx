@@ -72,7 +72,17 @@ export default function InstructorQuestionPage() {
     };
   }, [competition]);
 
-  useEffect(() => fetchCompetition(), [competitionId]);
+  useEffect(() => {
+  async function fetchData() {
+    try {
+      await fetchCompetition();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  fetchData();
+}, [competitionId]);
+
 
   useEffect(() => {
     if (

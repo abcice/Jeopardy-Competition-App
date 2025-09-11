@@ -3,7 +3,7 @@ import Jeopardy from '../../models/Jeopardy.js';
 import Buzz from '../../models/Buzz.js';
 import { createPlayerToken } from '../../config/playerToken.js';
 import jwt from 'jsonwebtoken';
-
+import { io, competitions } from '../../server.js';
 
 // List all competitions
 
@@ -128,16 +128,33 @@ export async function updateTeamScore(req, res) {
 }
 // Set current question
 
+
 export async function setCurrentQuestion(req, res) {
-    try{
-        const competition = await Competition.findById(req.params.id);
-        competition.currentQuestion = req.body.questionId;
-        await competition.save();
-        res.status(200).json(competition);
-    } catch (e) {
-        res.status(400).json({ msg: e.message });
+  try {
+    const competition = await Competition.findById(req.params.id).populate('jeopardy');
+    if (!competition.jeopardy) return res.status(400).json({ msg: "Jeopardy not found" });
+
+    const question = competition.jeopardy.categories
+      .flatMap(c => c.questions)
+      .find(q => q._id.toString() === req.body.questionId.toString());
+
+    if (!question) return res.status(404).json({ msg: "Question not found" });
+
+    competition.currentQuestion = question._id;
+    await competition.save();
+
+    // ✅ Update in-memory object
+    if (competitions[competition._id]) {
+      competitions[competition._id].currentQuestion = question._id;
     }
+
+    io.to(req.params.id).emit("question-chosen", { question });
+    res.status(200).json({ competition, question });
+  } catch (e) {
+    res.status(400).json({ msg: e.message });
+  }
 }
+
 // Record a buzz (optional, if you want REST buzz logging)
 export async function recordBuzz(req, res) {
   try {

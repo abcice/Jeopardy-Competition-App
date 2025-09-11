@@ -58,8 +58,8 @@ export default function App() {
         {isAuthenticated && <Route path="/competition/:id/player/setup" element={<PlayerGamePage playerToken={playerToken} />} />}
         {isAuthenticated && <Route path="/competitions/:competitionId/board" element={<QuestionBoard />} />}
         {isAuthenticated && <Route path="/competitions/:competitionId/question/instructor" element={<InstructorQuestionPage />} />}
-        {isAuthenticated && <Route path="/competitions/:competitionId/question/player" element={<PlayerQuestionPage />} />}
-        {isAuthenticated && <Route path="/competitions/:competitionId/rankings" element={<RankingPage />} />}
+        {isAuthenticated && <Route path="/competitions/:competitionId/question/player" element={<PlayerQuestionPage playerToken={playerToken} />} />}
+        {isAuthenticated && <Route path="/competitions/:competitionId/rankings" element={<RankingPage playerToken={playerToken} />} />}
 
         {isAuthenticated && user && (
           <>

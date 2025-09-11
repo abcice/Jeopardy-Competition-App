@@ -37,7 +37,7 @@ export default function QuestionBoard() {
   const handleCellClick = async (questionId) => {
     try {
       await competitionApi.setCurrentQuestion(competitionId, questionId);
-      navigate(`/competitions/${competitionId}/question`);
+      navigate(`/competitions/${competitionId}/question/instructor`);
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to set current question");

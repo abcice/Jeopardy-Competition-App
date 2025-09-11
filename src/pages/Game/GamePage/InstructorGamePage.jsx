@@ -66,6 +66,16 @@ export default function InstructorGamePage() {
       socket.off("competition-updated", handleCompetitionUpdate);
     };
   }, [competitionId, handleConnect, handleCompetitionUpdate]);
+  useEffect(() => {
+  if (teams.length > 0) {
+    const allJoined = teams.every((t) => (t.members?.length || 0) > 0);
+    if (allJoined) {
+      // Automatically move instructor to QuestionBoard
+      navigate(`/competitions/${competitionId}/board`);
+    }
+  }
+}, [teams, competitionId, navigate]);
+
 
   // --- Render ---
   if (loading || !competition) return <p>Loading competition...</p>;
