@@ -45,6 +45,7 @@ export function getUser() {
   if (!token) return null;
   
   try {
+    console.log(JSON.parse(atob(token.split('.')[1])));
     return JSON.parse(atob(token.split('.')[1])).user;
   } catch (error) {
     // Token is malformed, remove it

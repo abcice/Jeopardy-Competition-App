@@ -42,9 +42,11 @@ socket.on("join-competition", async ({ competitionId, role, teamId }) => {
      // Load competition from DB if not already loaded
   if (!competitions[competitionId]) {
     const comp = await Competition.findById(competitionId).lean();
+    console.log(competitions[competitionId])
     competitions[competitionId] = {
       teams: comp.teams.map(t => ({ ...t, members: [] }))
     };
+    console.log(competitions[competitionId])
     console.log(`🆕 Competition ${competitionId} initialized with teams:`, competitions[competitionId].teams);
   }
 
