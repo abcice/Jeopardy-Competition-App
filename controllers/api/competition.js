@@ -270,8 +270,33 @@ export async function markCorrect(req, res) {
     competition.currentQuestion = null;
 
     await competition.save();
+    
+// Reload competition to emit fresh data
+    const updatedCompetition = await Competition.findById(req.params.id)
+      .populate("jeopardy")
+      .lean();
 
-    res.status(200).json({ msg: "Answer marked correct", competition });
+    let currentQuestionDetails = null;
+    if (updatedCompetition.currentQuestion) {
+      for (const category of updatedCompetition.jeopardy.categories) {
+        const q = category.questions.id(updatedCompetition.currentQuestion);
+        if (q) {
+          currentQuestionDetails = {
+            ...q.toObject(),
+            category: { _id: category._id, name: category.name },
+          };
+          break;
+        }
+      }
+    }
+
+    io.to(req.params.id).emit("competition-updated", {
+      competition: updatedCompetition,
+      teams: updatedCompetition.teams,
+      currentQuestionDetails,
+    });
+
+    res.status(200).json({ msg: "Answer marked correct", competition: updatedCompetition });
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }
@@ -351,8 +376,33 @@ export async function skipQuestion(req, res) {
     competition.currentQuestion = null;
 
     await competition.save();
+    //
+    const updatedCompetition = await Competition.findById(req.params.id)
+  .populate("jeopardy")
+  .lean();
 
-    res.status(200).json({ msg: "Question skipped", competition });
+let currentQuestionDetails = null;
+if (updatedCompetition.currentQuestion) {
+  for (const category of updatedCompetition.jeopardy.categories) {
+    const q = category.questions.id(updatedCompetition.currentQuestion);
+    if (q) {
+      currentQuestionDetails = {
+        ...q.toObject(),
+        category: { _id: category._id, name: category.name },
+      };
+      break;
+    }
+  }
+}
+
+io.to(req.params.id).emit("competition-updated", {
+  competition: updatedCompetition,
+  teams: updatedCompetition.teams,
+  currentQuestionDetails,
+});
+
+
+    res.status(200).json({ msg: "Question skipped", competition: updatedCompetition });
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }
