@@ -16,6 +16,8 @@ export default function PlayerQuestionPage() {
   const [teamAnswering, setTeamAnswering] = useState(null);
   const [message, setMessage] = useState("");
   const [joinedTeamId, setJoinedTeamId] = useState(null);
+  const [buzzersEnabled, setBuzzersEnabled] = useState(false);
+
 
   // decode token
   const token = localStorage.getItem("playerToken");
@@ -38,6 +40,19 @@ export default function PlayerQuestionPage() {
       setMessage("❌ Failed to load competition.");
     }
   };
+
+  useEffect(() => {
+  const handleBuzzersToggled = ({ enabled }) => {
+    setBuzzersEnabled(enabled);
+  };
+
+  socket.on("buzzers-toggled", handleBuzzersToggled);
+
+  return () => {
+    socket.off("buzzers-toggled", handleBuzzersToggled);
+  };
+}, []);
+
 
   useEffect(() => {
     fetchCompetition();
@@ -147,8 +162,9 @@ export default function PlayerQuestionPage() {
           team={myTeam}
           identifierType="colors"
           onBuzz={handleBuzz}
-          disabled={!!teamAnswering}
+          disabled={!buzzersEnabled || !!teamAnswering}
         />
+
 
         {teamAnswering && <p>Team answering: {teamAnswering.name}</p>}
         {message && <p className={styles.message}>{message}</p>}

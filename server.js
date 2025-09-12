@@ -102,6 +102,13 @@ if (currentQuestionId) {
     }
   });
 
+  // --- toggle buzzers ---
+socket.on("toggle-buzzers", ({ competitionId, enabled }) => {
+  io.to(competitionId).emit("buzzers-toggled", { enabled });
+  console.log(`🚦 Buzzers ${enabled ? "enabled" : "disabled"} for competition ${competitionId}`);
+});
+
+
   // --- buzz ---
   socket.on("buzz", ({ competitionId, teamId }) => {
     const currentQuestionId = competitions[competitionId]?.currentQuestion || null;

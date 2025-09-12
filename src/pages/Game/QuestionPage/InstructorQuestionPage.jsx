@@ -65,7 +65,10 @@ export default function InstructorQuestionPage() {
   setCurrentQuestion(currentQuestionDetails);
   setTeamAnswering(null);
   setMessage("");
+  setBuzzersVisible(false); // 👈 reset on new question
+  socket.emit("toggle-buzzers", { competitionId, enabled: false });
 });
+
 
   return () => {
     socket.off("question-chosen", handleQuestionChosen);
@@ -225,7 +228,16 @@ export default function InstructorQuestionPage() {
 
         {/* Instructor controls */}
         <div className={styles.controls}>
-          <button onClick={() => setBuzzersVisible(true)} disabled={buzzersVisible || readyToGoBack}>Start!</button>
+          <button 
+    onClick={() => {
+      setBuzzersVisible(true);
+      socket.emit("toggle-buzzers", { competitionId, enabled: true });
+    }}
+    disabled={buzzersVisible || readyToGoBack}
+  >
+    Start!
+  </button>
+
           <button onClick={handleCorrect} disabled={!teamAnswering || answerShown || showDailyDouble || readyToGoBack}>Correct</button>
           <button onClick={handleWrong} disabled={!teamAnswering || showDailyDouble || readyToGoBack}>Wrong</button>
           <button onClick={handleSkip} disabled={answerShown || showDailyDouble || readyToGoBack}>Skip</button>
