@@ -109,23 +109,28 @@ export default function InstructorQuestionPage() {
 
 
   useEffect(() => {
-    if (
-      currentQuestion?.dailyDouble &&
-      teamAnswering &&
-      !dailyDoubleResolved &&
-      dailyDoubleBid === null
-    ) {
-      setShowDailyDouble(true);
-    } else {
-      setShowDailyDouble(false);
-    }
-  }, [currentQuestion, teamAnswering, dailyDoubleResolved, dailyDoubleBid]);
+  if (
+    currentQuestion?.dailyDouble &&
+    teamAnswering &&
+    !dailyDoubleResolved &&
+    dailyDoubleBid === null
+  ) {
+    setShowDailyDouble(true);
+  }
+}, [currentQuestion, teamAnswering, dailyDoubleResolved, dailyDoubleBid]);
+
 
   // Instructor actions
   const handleCorrect = async () => {
     if (!teamAnswering) return setMessage("⚠️ No team selected to answer.");
     try {
-      await competitionApi.markCorrect(competitionId, teamAnswering._id, teamAnswering.bid || 0);
+      const bidToSend = currentQuestion.dailyDouble
+  ? dailyDoubleBid || teamAnswering.bid || 0
+  : 0;
+
+await competitionApi.markCorrect(competitionId, teamAnswering._id, bidToSend);
+
+      
       setAnswerShown(true);
       setReadyToGoBack(true);
       socket.emit("reset-buzz", { competitionId });
@@ -146,18 +151,27 @@ export default function InstructorQuestionPage() {
   };
 
   const handleWrong = async () => {
-    if (!teamAnswering) return setMessage("⚠️ No team selected to answer.");
-    try {
-      await competitionApi.markWrong(competitionId, teamAnswering._id, teamAnswering.bid || 0);
-      setTeamAnswering(null);
-      setMessage("Teams may buzz again.");
-      await fetchCompetition();
-      socket.emit("reset-buzz", { competitionId });
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Failed to mark wrong.");
+  if (!teamAnswering) return setMessage("⚠️ No team selected to answer.");
+
+  try {
+    const isDailyDouble = currentQuestion?.dailyDouble;
+    const bidToSend = isDailyDouble && typeof teamAnswering.bid === 'number' ? teamAnswering.bid : undefined;
+
+    await competitionApi.markWrong(competitionId, teamAnswering._id, bidToSend);
+
+    setTeamAnswering(null);
+    setMessage("Teams may buzz again.");
+    await fetchCompetition();
+    socket.emit("reset-buzz", { competitionId });
+    if (isDailyDouble) {
+      setDailyDoubleResolved(true);
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setMessage("❌ Failed to mark wrong.");
+  }
+};
+
 
   const handleSkip = async () => {
     try {

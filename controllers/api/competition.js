@@ -253,21 +253,42 @@ export async function markCorrect(req, res) {
     }
 
     // ✅ Handle Daily Double
-    if (question.dailyDouble) {
-      if (typeof bid !== "number" || bid <= 0) {
-        return res.status(400).json({ msg: "Bid is required for Daily Double" });
-      }
-      if (bid > team.score) {
-        return res.status(400).json({ msg: "Bid cannot exceed team score" });
-      }
-      team.score += bid * 2; // correct → double the bid
-    } else {
-      team.score += question.points;
-    }
+  // current team answers correctly
+let pointsToAward;
+
+if (question.dailyDouble) {
+  const firstTeamBid = question.dailyDoubleFirstBid || question.points;
+
+  let firstTeamScore = 0;
+  if (question.dailyDoubleFirstTeamId) {
+    const firstTeam = await Team.findById(question.dailyDoubleFirstTeamId);
+    firstTeamScore = firstTeam ? firstTeam.score : 0;
+  }
+
+  const validFirstBid = Math.min(Math.max(firstTeamBid, 1), firstTeamScore || firstTeamBid);
+
+  if (team._id.toString() === question.dailyDoubleFirstTeamId?.toString()) {
+    // First team answering correctly
+    pointsToAward = (team.dailyDoubleBid || validFirstBid) * 2;
+  } else {
+    // Other team answering after first team's fail
+    pointsToAward = validFirstBid * 2;
+  }
+} else {
+  pointsToAward = question.points;
+}
+
+
+// Award points
+team.score += pointsToAward;
+await team.save();
+
+
 
     // Mark question as answered (clear currentQuestion)
     competition.answeredQuestions.push(question._id);
     competition.currentQuestion = null;
+    competition.dailyDoubleBid = null;
 
     await competition.save();
     
@@ -327,32 +348,58 @@ export async function markWrong(req, res) {
 
     // Find the question inside Jeopardy
     let question = null;
-    for (const category of competition.jeopardy.categories) {
-      const q = category.questions.id(competition.currentQuestion);
-      if (q) {
-        question = q;
-        break;
-      }
-    }
+for (const category of competition.jeopardy.categories) {
+  const q = category.questions.find(q => q._id.toString() === competition.currentQuestion.toString());
+  if (q) {
+    question = q;
+    break;
+  }
+}
+
     if (!question) {
       return res.status(404).json({ msg: "Question not found in Jeopardy" });
     }
 
     // Subtract bid points if it's a Daily Double
-    if (question.dailyDouble) {
-      if (typeof bid !== "number" || bid <= 0) {
-        return res.status(400).json({ msg: "Bid is required for Daily Double" });
-      }
-      if (bid > team.score) {
-        return res.status(400).json({ msg: "Bid cannot exceed team score" });
-      }
-      team.score -= bid; // subtract the bid
-    }
+    if (question.dailyDouble && !competition.dailyDoubleBid && typeof bid === "number") {
+      // Only the first team loses points if wrong
+      if (!competition.dailyDoubleBid && bid ) {
+        if (typeof bid !== "number" || bid <= 0) return res.status(400).json({ msg: "Bid is required for Daily Double" });
+        if (bid > team.score) return res.status(400).json({ msg: "Bid cannot exceed team score" });
 
+        competition.dailyDoubleBid = bid;
+        team.score -= bid; // first team wrong → lose bid
+      }
+      // Subsequent teams lose nothing if wrong
+    }
     // Do NOT clear currentQuestion so teams can buzz again
     await competition.save();
+    const updatedCompetition = await Competition.findById(req.params.id)
+  .populate("jeopardy")
+  .lean();
 
-    res.status(200).json({ msg: "Answer marked wrong, teams may buzz again", competition });
+let currentQuestionDetails = null;
+if (updatedCompetition.currentQuestion) {
+  for (const category of updatedCompetition.jeopardy.categories) {
+    const q = category.questions.find(q => q._id.toString() === updatedCompetition.currentQuestion.toString());
+    if (q) {
+      currentQuestionDetails = {
+        ...q,
+        category: { _id: category._id, name: category.name },
+      };
+      break;
+    }
+  }
+}
+
+
+io.to(req.params.id).emit("competition-updated", {
+  competition: updatedCompetition,
+  teams: updatedCompetition.teams,
+  currentQuestionDetails,
+});
+
+    res.status(200).json({ msg: "Answer marked wrong, teams may buzz again", competition: updatedCompetition });
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }

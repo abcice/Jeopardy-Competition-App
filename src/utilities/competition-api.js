@@ -38,7 +38,7 @@ export function setCurrentQuestion(id, questionId) {
   return sendRequest(`${BASE_URL}/${id}/current-question`, 'PUT', { questionId });
 }
 
-export function markCorrect(id, teamId, bid) {
+export function markCorrect(id, teamId, bid=0) {
   return sendRequest(`${BASE_URL}/${id}/mark-correct`, 'PUT', { teamId, bid });
 }
 
