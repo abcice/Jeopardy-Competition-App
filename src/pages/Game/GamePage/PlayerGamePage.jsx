@@ -67,14 +67,19 @@ export default function PlayerGamePage({ playerToken }) {
 
   // --- Team assignment ---
   useEffect(() => {
-    const teamAssignedHandler = ({ teamId }) => {
-      console.log("🎉 Team assignment event received. TeamId:", teamId);
-      setJoinedTeamId(teamId);
-    };
+  const teamAssignedHandler = ({ teamId, playerToken }) => {
+    console.log("🎉 Team assignment received:", teamId);
+    setJoinedTeamId(teamId);
 
-    socket.on("team-assigned", teamAssignedHandler);
-    return () => socket.off("team-assigned", teamAssignedHandler);
-  }, []);
+    if (playerToken) {
+      localStorage.setItem("playerToken", playerToken);
+    }
+  };
+
+  socket.on("team-assigned", teamAssignedHandler);
+  return () => socket.off("team-assigned", teamAssignedHandler);
+}, []);
+
 
   // --- Socket setup ---
   useEffect(() => {

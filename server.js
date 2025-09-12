@@ -6,6 +6,8 @@ import app from './app-server.js';
 import http from 'http';
 import { Server } from 'socket.io';
 import Competition from './models/Competition.js';
+import { createPlayerToken } from "./config/playerToken.js"; 
+
  
 
 
@@ -61,7 +63,14 @@ io.on("connection", (socket) => {
         if (team) {
           team.members = [socket.id];
           console.log(`Assigned player ${socket.id} to team ${team.name}`);
-          socket.emit("team-assigned", { teamId: team._id });
+          const playerToken = createPlayerToken({
+          teamId: team._id,
+          competitionId
+        });
+          socket.emit("team-assigned", {
+          teamId: team._id,
+          playerToken,
+        });
         } else {
           console.log(`❌ No available teams for player ${socket.id}`);
           socket.emit("join-rejected", { reason: "No available teams left" });
