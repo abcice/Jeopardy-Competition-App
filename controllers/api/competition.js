@@ -128,18 +128,31 @@ export async function updateTeamScore(req, res) {
 }
 // Set current question
 
-
 export async function setCurrentQuestion(req, res) {
   try {
-    const competition = await Competition.findById(req.params.id).populate('jeopardy');
-    if (!competition.jeopardy) return res.status(400).json({ msg: "Jeopardy not found" });
+    const competition = await Competition.findById(req.params.id).populate("jeopardy");
+    if (!competition.jeopardy) {
+      return res.status(400).json({ msg: "Jeopardy not found" });
+    }
 
-    const question = competition.jeopardy.categories
-      .flatMap(c => c.questions)
-      .find(q => q._id.toString() === req.body.questionId.toString());
+    // 🔎 find question in jeopardy
+    let question = null;
+    let categoryInfo = null;
 
-    if (!question) return res.status(404).json({ msg: "Question not found" });
+    for (const category of competition.jeopardy.categories) {
+      const q = category.questions.id(req.body.questionId);
+      if (q) {
+        question = q;
+        categoryInfo = { _id: category._id, name: category.name };
+        break;
+      }
+    }
 
+    if (!question) {
+      return res.status(404).json({ msg: "Question not found" });
+    }
+
+    // ✅ Save current question
     competition.currentQuestion = question._id;
     await competition.save();
 
@@ -148,12 +161,25 @@ export async function setCurrentQuestion(req, res) {
       competitions[competition._id].currentQuestion = question._id;
     }
 
-    io.to(req.params.id).emit("question-chosen", { question });
-    res.status(200).json({ competition, question });
+    // ✅ Prepare details with category
+    const currentQuestionDetails = {
+      ...question.toObject(),
+      category: categoryInfo,
+    };
+
+    // 🔔 Broadcast to all players + instructor in the room
+    io.to(req.params.id).emit("question-chosen", {
+      competitionId: competition._id,
+      currentQuestionDetails,
+    });
+
+    // Respond to the instructor who triggered it
+    res.status(200).json({ competition, currentQuestionDetails });
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }
 }
+
 
 // Record a buzz (optional, if you want REST buzz logging)
 export async function recordBuzz(req, res) {

@@ -53,6 +53,27 @@ export default function InstructorQuestionPage() {
   };
 
   useEffect(() => {
+  const handleQuestionChosen = ({ question }) => {
+    setCurrentQuestion(question);
+    setTeamAnswering(null);
+    setDailyDoubleResolved(false);
+    setDailyDoubleBid(null);
+    setAnswerShown(false);
+  };
+
+  socket.on("question-chosen", ({ currentQuestionDetails }) => {
+  setCurrentQuestion(currentQuestionDetails);
+  setTeamAnswering(null);
+  setMessage("");
+});
+
+  return () => {
+    socket.off("question-chosen", handleQuestionChosen);
+  };
+}, []);
+
+
+  useEffect(() => {
     socket.on("buzz-locked", ({ teamId }) => {
       const team = competition?.teams.find((t) => t._id === teamId);
       if (team) {

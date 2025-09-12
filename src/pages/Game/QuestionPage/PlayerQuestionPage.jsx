@@ -66,6 +66,10 @@ export default function PlayerQuestionPage() {
           teams: data.teams,
         }));
       }
+      // also sync current question if provided
+   if (data.currentQuestionDetails) {
+     setCurrentQuestion(data.currentQuestionDetails);
+  }
     };
 
     socket.on("competition-updated", handleCompetitionUpdate);
@@ -73,6 +77,25 @@ export default function PlayerQuestionPage() {
       socket.off("competition-updated", handleCompetitionUpdate);
     };
   }, []);
+
+  useEffect(() => {
+  const handleQuestionChosen = ({ question }) => {
+    setCurrentQuestion(question);
+    setTeamAnswering(null);  // reset buzz state
+    setMessage("");
+  };
+
+  socket.on("question-chosen", ({ currentQuestionDetails }) => {
+  setCurrentQuestion(currentQuestionDetails);
+  setTeamAnswering(null);
+  setMessage("");
+});
+
+  return () => {
+    socket.off("question-chosen", handleQuestionChosen);
+  };
+}, []);
+
 
   // socket: buzz events
   useEffect(() => {
