@@ -144,6 +144,12 @@ socket.on("toggle-buzzers", ({ competitionId, enabled }) => {
     }
   });
 
+  //---Game Finished---//
+  socket.on("game-finished", ({ competitionId }) => {
+  io.to(competitionId).emit("game-finished");
+  console.log(`🏁 Game finished for competition ${competitionId}`);
+});
+
   // --- disconnect ---
   socket.on("disconnect", () => {
     console.log(`❌ Client disconnected: ${socket.id}`);

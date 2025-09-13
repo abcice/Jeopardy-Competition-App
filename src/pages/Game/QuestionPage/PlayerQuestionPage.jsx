@@ -1,6 +1,6 @@
 // src/pages/Competition/QuestionPage/PlayerQuestionPage.jsx
 import { useState, useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate  } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import * as playerApi from "../../../utilities/player-competition-api";
@@ -9,14 +9,18 @@ import styles from "./QuestionPage.module.scss";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
 import BuzzButton from "../../../components/BuzzButton/BuzzButton";
 
+
 export default function PlayerQuestionPage() {
   const { competitionId } = useParams();
+  const navigate = useNavigate();
   const [competition, setCompetition] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [teamAnswering, setTeamAnswering] = useState(null);
   const [message, setMessage] = useState("");
   const [joinedTeamId, setJoinedTeamId] = useState(null);
   const [buzzersEnabled, setBuzzersEnabled] = useState(false);
+  const [showRanking, setShowRanking] = useState(false);
+
 
 
   // decode token
@@ -142,9 +146,17 @@ export default function PlayerQuestionPage() {
 
   socket.emit("buzz", { competitionId, teamId: myTeam._id });
 };
+ useEffect(() => {
+  const handleGameFinished = () => {
+    navigate(`/competitions/${competitionId}/rankings/player`);
+  };
+  socket.on("game-finished", handleGameFinished);
+  return () => socket.off("game-finished", handleGameFinished);
+}, [competitionId, navigate]);
 
 
-  // loading state
+
+
   if (!competition || !currentQuestion) return <p>Loading question...</p>;
 
   return (

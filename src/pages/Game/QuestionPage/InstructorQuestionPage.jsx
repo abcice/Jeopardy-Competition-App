@@ -143,6 +143,7 @@ await competitionApi.markCorrect(competitionId, teamAnswering._id, bidToSend);
       );
       if (updatedCompetition.competition.answeredQuestions.length === totalQuestions) {
         setShowRanking(true);
+        socket.emit("game-finished", { competitionId }); // 👈 notify players
       }
     } catch (err) {
       console.error(err);

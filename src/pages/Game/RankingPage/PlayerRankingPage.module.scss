@@ -1,0 +1,21 @@
+.teamItem {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #ddd;
+}
+
+.myTeam {
+  background-color: #fffae6; // subtle highlight
+  font-weight: bold;
+}
+
+.winnerGlow {
+  box-shadow: 0 0 10px gold;
+}
+
+.winner {
+  font-size: 1.5rem;
+  color: gold;
+  margin-bottom: 15px;
+}

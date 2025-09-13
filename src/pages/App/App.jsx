@@ -23,6 +23,7 @@ import InstructorQuestionPage from "../Game/QuestionPage/InstructorQuestionPage"
 import PlayerQuestionPage from "../Game/QuestionPage/PlayerQuestionPage";
 import RankingPage from "../Game/RankingPage/RankingPage";
 import PlayerGamePage from "../Game/GamePage/PlayerGamePage";
+import PlayerRankingPage from "../Game/RankingPage/PlayerRankingPage";
 
 function getValidPlayerToken() {
   const token = localStorage.getItem("playerToken");
@@ -60,6 +61,8 @@ export default function App() {
         {isAuthenticated && <Route path="/competitions/:competitionId/question/instructor" element={<InstructorQuestionPage />} />}
         {isAuthenticated && <Route path="/competitions/:competitionId/question/player" element={<PlayerQuestionPage playerToken={playerToken} />} />}
         {isAuthenticated && <Route path="/competitions/:competitionId/rankings" element={<RankingPage playerToken={playerToken} />} />}
+        {isAuthenticated && <Route path="/competitions/:competitionId/rankings/player" element={<PlayerRankingPage playerToken={playerToken} />} />}
+
 
         {isAuthenticated && user && (
           <>
