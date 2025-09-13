@@ -4,6 +4,8 @@ import Buzz from '../../models/Buzz.js';
 import { createPlayerToken } from '../../config/playerToken.js';
 import jwt from 'jsonwebtoken';
 import { io, competitions } from '../../server.js';
+const dailyDoubleCache = new Map();
+
 
 // List all competitions
 
@@ -217,19 +219,19 @@ export async function updateStatus(req, res) {
 }
 
 // markCorrect
+
 export async function markCorrect(req, res) {
   try {
-    const competition = await Competition.findById(req.params.id).populate('jeopardy');
+    const competition = await Competition.findById(req.params.id).populate("jeopardy");
     if (!competition) {
       return res.status(404).json({ msg: "Competition not found" });
     }
 
-    // Must have a current question
     if (!competition.currentQuestion) {
       return res.status(400).json({ msg: "No current question is set" });
     }
 
-    const { teamId, bid } = req.body; // bid = only used if Daily Double
+    const { teamId } = req.body;
     if (!teamId) {
       return res.status(400).json({ msg: "Team ID is required" });
     }
@@ -239,7 +241,7 @@ export async function markCorrect(req, res) {
       return res.status(404).json({ msg: "Team not found" });
     }
 
-    // Find the question inside Jeopardy
+    // Find the current question
     let question = null;
     for (const category of competition.jeopardy.categories) {
       const q = category.questions.id(competition.currentQuestion);
@@ -252,69 +254,55 @@ export async function markCorrect(req, res) {
       return res.status(404).json({ msg: "Question not found in Jeopardy" });
     }
 
-    // ✅ Handle Daily Double
-  // current team answers correctly
-let pointsToAward;
+    let pointsToAward;
 
-if (question.dailyDouble) {
-  const firstTeamBid = question.dailyDoubleFirstBid || question.points;
+    if (question.dailyDouble) {
+  let cache = dailyDoubleCache.get(competition._id.toString());
 
-  let firstTeamScore = 0;
-  if (question.dailyDoubleFirstTeamId) {
-    const firstTeam = await Team.findById(question.dailyDoubleFirstTeamId);
-    firstTeamScore = firstTeam ? firstTeam.score : 0;
+  // 🔹 If no cache yet, this is the first attempt (team answered correctly first try)
+  if (!cache) {
+    const { bid } = req.body;
+    if (typeof bid !== "number" || bid <= 0) {
+      return res.status(400).json({ msg: "Bid is required for Daily Double" });
+    }
+    cache = { bid, teamId: team._id.toString() };
+    dailyDoubleCache.set(competition._id.toString(), cache);
   }
 
-  const validFirstBid = Math.min(Math.max(firstTeamBid, 1), firstTeamScore || firstTeamBid);
+  const firstBid = cache.bid;
+  const firstTeamId = cache.teamId;
 
-  if (team._id.toString() === question.dailyDoubleFirstTeamId?.toString()) {
-    // First team answering correctly
-    pointsToAward = (team.dailyDoubleBid || validFirstBid) * 2;
+  if (team._id.toString() === firstTeamId) {
+    pointsToAward = Math.max(firstBid, question.points) * 2;  // ✅ Double the actual bid
   } else {
-    // Other team answering after first team's fail
-    pointsToAward = validFirstBid * 2;
+    pointsToAward = Math.max(firstBid, question.points) * 2;
   }
+
+  // ✅ Clear cache after resolution
+  dailyDoubleCache.delete(competition._id.toString());
 } else {
   pointsToAward = question.points;
 }
 
 
-// Award points
-team.score += pointsToAward;
-await team.save();
 
 
+    // ✅ Award points
+    team.score += pointsToAward;
 
-    // Mark question as answered (clear currentQuestion)
+    // Mark as answered
     competition.answeredQuestions.push(question._id);
     competition.currentQuestion = null;
-    competition.dailyDoubleBid = null;
-
     await competition.save();
-    
-// Reload competition to emit fresh data
+
     const updatedCompetition = await Competition.findById(req.params.id)
       .populate("jeopardy")
       .lean();
 
-    let currentQuestionDetails = null;
-    if (updatedCompetition.currentQuestion) {
-      for (const category of updatedCompetition.jeopardy.categories) {
-        const q = category.questions.id(updatedCompetition.currentQuestion);
-        if (q) {
-          currentQuestionDetails = {
-            ...q.toObject(),
-            category: { _id: category._id, name: category.name },
-          };
-          break;
-        }
-      }
-    }
-
     io.to(req.params.id).emit("competition-updated", {
       competition: updatedCompetition,
       teams: updatedCompetition.teams,
-      currentQuestionDetails,
+      currentQuestionDetails: null,
     });
 
     res.status(200).json({ msg: "Answer marked correct", competition: updatedCompetition });
@@ -322,7 +310,6 @@ await team.save();
     res.status(400).json({ msg: e.message });
   }
 }
-
 
 // markWrong (subtract bid if Daily Double)
 export async function markWrong(req, res) {
@@ -361,19 +348,29 @@ for (const category of competition.jeopardy.categories) {
     }
 
     // Subtract bid points if it's a Daily Double
-    if (question.dailyDouble && !competition.dailyDoubleBid && typeof bid === "number") {
-      // Only the first team loses points if wrong
-      if (!competition.dailyDoubleBid && bid ) {
-        if (typeof bid !== "number" || bid <= 0) return res.status(400).json({ msg: "Bid is required for Daily Double" });
-        if (bid > team.score) return res.status(400).json({ msg: "Bid cannot exceed team score" });
+    if (question.dailyDouble) {
+  let cache = dailyDoubleCache.get(competition._id.toString());
 
-        competition.dailyDoubleBid = bid;
-        team.score -= bid; // first team wrong → lose bid
-      }
-      // Subsequent teams lose nothing if wrong
+  if (!cache) {
+    if (typeof bid !== "number" || bid <= 0) {
+      return res.status(400).json({ msg: "Bid is required for Daily Double" });
     }
-    // Do NOT clear currentQuestion so teams can buzz again
-    await competition.save();
+    cache = { bid, teamId: team._id.toString() };
+    dailyDoubleCache.set(competition._id.toString(), cache);
+  }
+
+  // Deduct points from first team only
+  if (team._id.toString() === cache.teamId) {
+    team.score -= cache.bid;
+  }
+
+  await competition.save();
+}
+
+
+
+
+    // await competition.save();
     const updatedCompetition = await Competition.findById(req.params.id)
   .populate("jeopardy")
   .lean();
