@@ -11,6 +11,8 @@ import RankingContent from "../RankingPage/RankingContent";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
 import BuzzButton from "../../../components/BuzzButton/BuzzButton";
 import JeopardyTheme from "../../../assets/Jeopardy-Theme.mp3"
+import CorrectSound from "../../../assets/correct.mp3"
+import WrongSound from "../../../assets/wrong.mp3"
 
 export default function InstructorQuestionPage() {
   const { competitionId } = useParams();
@@ -30,6 +32,9 @@ export default function InstructorQuestionPage() {
   const [message, setMessage] = useState("");
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef(null);
+  const correctAudio = new Audio(CorrectSound);
+  const wrongAudio = new Audio(WrongSound);
+
 
 
   const fetchCompetition = async () => {
@@ -128,6 +133,8 @@ export default function InstructorQuestionPage() {
   const handleCorrect = async () => {
     if (!teamAnswering) return setMessage("⚠️ No team selected to answer.");
     try {
+      correctAudio.currentTime = 0; 
+     correctAudio.play();
       const bidToSend = currentQuestion.dailyDouble
   ? dailyDoubleBid || teamAnswering.bid || 0
   : 0;
@@ -159,6 +166,8 @@ await competitionApi.markCorrect(competitionId, teamAnswering._id, bidToSend);
   if (!teamAnswering) return setMessage("⚠️ No team selected to answer.");
 
   try {
+    wrongAudio.currentTime = 0;
+    wrongAudio.play();
     const isDailyDouble = currentQuestion?.dailyDouble;
     const bidToSend = isDailyDouble && typeof teamAnswering.bid === 'number' ? teamAnswering.bid : undefined;
 

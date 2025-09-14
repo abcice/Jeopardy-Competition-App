@@ -1,4 +1,4 @@
-import Navbar from "../../../components/Navbar/Navbar";
+import Header from "../../../components/Header/Header";
 import Footer from "../../../components/Footer/Footer";
 import PlayerRankingContent from "./PlayerRankingContent";
 
@@ -9,7 +9,7 @@ export default function PlayerRankingPage({ playerToken }) {
 
   return (
     <>
-      <Navbar />
+      <Header />
       <main>
         <PlayerRankingContent playerToken={playerToken} />
       </main>

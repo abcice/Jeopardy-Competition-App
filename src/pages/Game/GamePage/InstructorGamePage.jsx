@@ -7,6 +7,7 @@ import * as competitionApi from "../../../utilities/competition-api";
 import socket from "../../../utilities/socket";
 import styles from "./InstructorGamePage.module.scss";
 
+
 export default function InstructorGamePage() {
   const { id: competitionId } = useParams();
   const navigate = useNavigate();

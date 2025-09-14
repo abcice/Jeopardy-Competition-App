@@ -1,5 +1,5 @@
-// src/components/BuzzButton/BuzzButton.jsx
 import styles from "./BuzzButton.module.scss";
+import BuzzSound from "../../assets/Buzzer.mp3";
 
 // Darken color function for stronger gradient
 function darkenColor(hex, percent) {
@@ -24,10 +24,19 @@ export default function BuzzButton({ team, onBuzz, disabled }) {
   const color = team.color || "#f43f5e";
   const darkColor = darkenColor(color, 25);
 
+  const handleClick = () => {
+    // Play buzz sound once
+    const audio = new Audio(BuzzSound);
+    audio.play();
+    
+    // Call the passed onBuzz handler
+    onBuzz && onBuzz();
+  };
+
   return (
     <button
       className={styles.buzz}
-      onClick={onBuzz}
+      onClick={handleClick}
       disabled={disabled}
       style={{
         "--team-color": color,

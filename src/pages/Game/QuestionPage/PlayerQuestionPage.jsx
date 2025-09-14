@@ -9,6 +9,7 @@ import styles from "./QuestionPage.module.scss";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
 import BuzzButton from "../../../components/BuzzButton/BuzzButton";
 import JeopardyTheme from "../../../assets/Jeopardy-Theme.mp3"
+import Header from "../../../components/Header/Header";
 
 
 export default function PlayerQuestionPage() {
@@ -165,7 +166,7 @@ export default function PlayerQuestionPage() {
 
   return (
     <>
-      <Navbar />
+      <Header />
       <audio ref={audioRef} src={JeopardyTheme} loop autoPlay />
             <div className={styles.muteButtonContainer}>
               <button
