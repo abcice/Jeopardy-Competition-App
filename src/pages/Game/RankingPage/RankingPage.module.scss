@@ -1,33 +1,93 @@
-/* RankingPage.module.scss */
 .ranking-page {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  gap: 2rem;
+  background: #f4f6f8;
+  border-radius: 16px;
 
   h2 {
-    margin-bottom: 2rem;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    color: #222;
+    margin-bottom: 1rem;
+  }
+
+  .winner {
+    background: linear-gradient(135deg, #ffd700, #ffbf00);
+    padding: 1rem 2rem;
+    border-radius: 14px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #222;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+    margin-bottom: 1.5rem;
+    animation: glow 1.5s infinite alternate;
+  }
+
+  @keyframes glow {
+    0% {
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    }
+    100% {
+      box-shadow: 0 0 25px rgba(255, 215, 0, 1);
+    }
   }
 
   .teamList {
     list-style: none;
-    padding: 0;
+    padding: 1rem;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    background: #e2e8f0;
+    border-radius: 16px;
   }
 
   .teamItem {
-    display: flex;
-    justify-content: space-between;
-    background: #f0f0f0;
-    padding: 1rem 2rem;
+    display: grid;
+    grid-template-columns: 50px 1fr 70px;
+    align-items: center;
+    padding: 1rem 1.5rem;
     border-radius: 12px;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid #cbd5e1;
+    background: #fff;
+    color: #111;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .rank {
+      font-weight: 700;
+      text-align: center;
+      color: #007bff;
+    }
+
+    .name {
+      text-align: left;
+    }
+
+    .score {
+      font-weight: 700;
+      text-align: right;
+      color: #16a34a;
+    }
 
     &.winnerGlow {
-      background: #ffd700;
-      box-shadow: 0 0 20px #ffd700;
+      background: linear-gradient(135deg, #ffd700, #ffbf00);
+      color: #222;
+      border: 2px solid #ffbf00;
+      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
     }
   }
 
@@ -40,5 +100,62 @@
     background: #28a745;
     color: white;
     cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #218838;
+      transform: translateY(-2px);
+    }
   }
+}
+.winner {
+  background: linear-gradient(135deg, #ffd700, #ffbf00, #fff176);
+  padding: 1.5rem 3rem;
+  border-radius: 16px;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #222;
+  box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  animation: winnerGlow 1.5s infinite alternate, winnerPulse 2s infinite ease-in-out;
+}
+
+@keyframes winnerGlow {
+  0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
+  100% { box-shadow: 0 0 35px rgba(255, 223, 0, 1); }
+}
+
+@keyframes winnerPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Optional: tiny sparkles moving across */
+.winner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
+  opacity: 0.2;
+  animation: sparkle 2s linear infinite;
+}
+
+@keyframes sparkle {
+  0% { transform: translate(0,0) rotate(0deg); }
+  100% { transform: translate(50%,50%) rotate(360deg); }
+}
+.teamItem.winnerGlow {
+  background: linear-gradient(135deg, #ffd700, #ffea00, #fff176);
+  color: #222;
+  border: none;
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.7), 0 0 15px rgba(255, 255, 255, 0.3) inset;
+  transform: scale(1.05);
+  animation: winnerPulse 2s infinite ease-in-out;
 }

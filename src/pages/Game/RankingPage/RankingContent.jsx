@@ -4,10 +4,12 @@ import * as competitionApi from "../../../utilities/competition-api";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import styles from "./RankingPage.module.scss";
+import Confetti from "react-confetti";
 
 export default function RankingContent({ competitionId }) {
   const [competition, setCompetition] = useState(null);
   const [gameFinished, setGameFinished] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const navigate = useNavigate();
 
   const fetchCompetition = async () => {
@@ -19,7 +21,9 @@ export default function RankingContent({ competitionId }) {
         (acc, cat) => acc + cat.questions.length,
         0
       );
-      setGameFinished(res.competition.answeredQuestions.length === totalQuestions);
+      setGameFinished(
+        res.competition.answeredQuestions.length === totalQuestions
+      );
     } catch (err) {
       console.error(err);
     }
@@ -31,23 +35,43 @@ export default function RankingContent({ competitionId }) {
     return () => clearInterval(interval);
   }, [competitionId]);
 
+  // ⬇️ This hook must run regardless of whether `competition` is loaded
+  useEffect(() => {
+    if (gameFinished && competition) {
+      const sortedTeams = [...competition.teams].sort(
+        (a, b) => b.score - a.score
+      );
+      const winnerTeam = sortedTeams[0];
+      if (winnerTeam) {
+        setShowConfetti(true);
+        const timer = setTimeout(() => setShowConfetti(false), 6000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [gameFinished, competition]);
+
   if (!competition) return <p>Loading rankings...</p>;
 
   const sortedTeams = [...competition.teams].sort((a, b) => b.score - a.score);
   const winnerTeam = gameFinished ? sortedTeams[0] : null;
 
-  // ✅ Handler for finishing the game
   const handleFinishGame = async () => {
     try {
       await competitionApi.updateStatus(competitionId, "finished");
-      navigate("/"); // back to dashboard
+      navigate("/");
     } catch (err) {
       console.error("Failed to complete game", err);
     }
   };
 
   return (
-    <div className={`${styles["ranking-page"]} ${gameFinished ? styles.finished : ""}`}>
+    <div
+      className={`${styles["ranking-page"]} ${
+        gameFinished ? styles.finished : ""
+      }`}
+    >
+      {showConfetti && <Confetti />}
+
       <h2>{gameFinished ? "🏆 Game Over! Winner:" : "Current Rankings"}</h2>
 
       {gameFinished && winnerTeam && (
@@ -60,7 +84,9 @@ export default function RankingContent({ competitionId }) {
         {sortedTeams.map((team, idx) => (
           <li
             key={team._id}
-            className={`${styles.teamItem} ${gameFinished && idx === 0 ? styles.winnerGlow : ""}`}
+            className={`${styles.teamItem} ${
+              gameFinished && idx === 0 ? styles.winnerGlow : ""
+            }`}
           >
             <span className={styles.rank}>{idx + 1}.</span>
             <span className={styles.name}>{team.name}</span>

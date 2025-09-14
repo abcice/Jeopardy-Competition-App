@@ -1,49 +1,156 @@
 .gamePage {
-  max-width: 700px;
-  margin: 2em auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   padding: 2em;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  background: #f0f2f5;
+  gap: 2em;
+  justify-content: center;
+
+  .card {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3em 2.5em;
+    background: linear-gradient(145deg, #ffffff, #f9f9f9);
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+    }
+  }
 
   main {
     display: flex;
     flex-direction: column;
-    gap: 1em;
+    gap: 2em;
+    flex: 1;
   }
 
   h1, h2 {
     text-align: center;
+    color: #222;
   }
 
+  label {
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 0.25em;
+  }
+
+  /* Controls wrapper */
   .controls {
     display: flex;
     flex-direction: column;
     gap: 1em;
 
-    input, select {
-      width: 100%;
+    @media (min-width: 768px) {
+      flex-direction: row;
+      gap: 1em;
+      align-items: flex-end;
     }
 
-    button {
+    .controlItem {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+
+      input,
+      select {
+        width: 100%;
+        padding: 0.65em 0.9em;
+        border-radius: 12px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        height: 3em;
+        transition: all 0.2s ease;
+
+        &:focus {
+          border-color: #007bff;
+          box-shadow: 0 0 10px rgba(0,123,255,0.2);
+          outline: none;
+        }
+      }
+    }
+
+    > button {
+      padding: 0 1.2em;
+      height: 3em;
+      border-radius: 12px;
       background-color: #007bff;
       color: #fff;
-      padding: 0.5em;
-      border-radius: 6px;
+      font-weight: 600;
       font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+
       &:hover {
         background-color: #0056b3;
+        transform: translateY(-1px);
+      }
+
+      @media (min-width: 768px) {
+        flex: 0 0 auto;
+        align-self: flex-end;
       }
     }
   }
 
+  .generateButton {
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+    padding: 0.75em 1.2em;
+    border-radius: 12px;
+    background-color: #007bff;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+
+    &:hover {
+      background-color: #0056b3;
+      transform: translateY(-1px);
+    }
+
+    @media (min-width: 768px) {
+      width: auto;
+      align-self: flex-start;
+    }
+  }
+
   .teamsPreview {
+    background: #f7f9fc;
+    padding: 1.5em;
+    border-radius: 14px;
+    border: 1px solid #e0e0e0;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+
     ul {
       list-style: none;
       padding: 0;
+
       li {
         padding: 0.5em 0;
-        font-weight: bold;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+
+        &:last-child {
+          border-bottom: none;
+        }
       }
     }
   }
@@ -51,11 +158,83 @@
   .actions {
     display: flex;
     justify-content: space-between;
-    margin-top: 1em;
+    gap: 1em;
+
+    button {
+      flex: 1;
+    }
   }
 
   .message {
     text-align: center;
-    color: green;
+    color: #28a745;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .joinCode {
+    text-align: center;
+    background: #e3f9e5;
+    padding: 0.85em 1.2em;
+    border-radius: 12px;
+    font-weight: 600;
+    color: #155724;
+    margin-bottom: 1em;
+
+    code {
+      background: #c3e6cb;
+      padding: 0.3em 0.6em;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+  }
+}
+
+/* Large screen adjustments */
+@media (min-width: 1024px) {
+  .gamePage {
+    padding: 3em 4em;
+
+    .card {
+      max-width: 850px;
+      padding: 3.5em 3em;
+    }
+  }
+}
+.teamsPreview {
+  background: #f7f9fc;
+  padding: 1.5em;
+  border-radius: 14px;
+  border: 1px solid #e0e0e0;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+
+  h2 {
+    text-align: center;
+    margin-bottom: 1em;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: 0.6em 1em;
+      font-weight: 600;
+      text-align: center;
+      border-radius: 8px;
+      color: #fff;
+      margin-bottom: 0.5em;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
   }
 }

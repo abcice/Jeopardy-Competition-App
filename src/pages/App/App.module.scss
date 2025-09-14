@@ -1,12 +1,22 @@
 .App {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100vh; /* full viewport height */
   font-family: 'Inter', sans-serif;
   font-size: 16px;
-  background: #f5f6fa; /* light, neutral background */
+  background: #f5f6fa;
   color: #2d2d2d;
+
+  main {
+    flex: 1; /* takes all available space between header/nav and footer */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    box-sizing: border-box;
+  }
 }
+
 
 h1, h2, h3, h4 {
   font-weight: 600;
@@ -50,4 +60,12 @@ input, textarea, select {
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: #3b82f6; /* bright but friendly blue */
+}
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh; // half the viewport
+  font-size: 1.2rem;
+  color: #555;
 }

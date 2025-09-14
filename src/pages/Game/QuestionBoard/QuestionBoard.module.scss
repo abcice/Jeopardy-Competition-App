@@ -2,56 +2,71 @@
   max-width: 1200px;
   margin: 2em auto;
   padding: 2em;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
 }
 
 .title {
-  font-size: 2.5rem; /* Bigger for projection */
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #222;
   margin-bottom: 1.5rem;
-  font-weight: bold;
-  color: #333;
 }
 
 .message {
-  margin: 1em 0;
-  color: red;
-  font-weight: 500;
+  color: #e63946;
+  font-weight: 600;
   font-size: 1.2rem;
+  margin: 1em 0;
 }
 
+/* The grid looks like a real table */
 .grid {
   display: grid;
-  gap: 12px;
+  border: 3px solid #007bff;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
+/* Category headers like table headers */
 .category {
   background: #007bff;
   color: #fff;
-  padding: 16px;
-  font-weight: bold;
+  padding: 16px 0;
+  font-weight: 700;
   text-transform: uppercase;
-  border-radius: 8px;
-  font-size: 1.3rem; /* Larger category text */
+  font-size: 1.4rem;
+  border-right: 2px solid #0056b3;
+
+  &:last-child {
+    border-right: none;
+  }
 }
 
+/* Question cells */
 .cell {
   background: #f0f8ff;
-  border: 2px solid #ccc;
-  font-size: 2rem; /* Much larger points text */
+  border-top: 2px solid #007bff;
+  border-right: 2px solid #007bff;
+  font-size: 2rem;
   font-weight: 700;
   color: #007bff;
-  padding: 30px; /* Larger clickable area */
-  border-radius: 8px;
+  padding: 30px 0;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   transition: all 0.2s ease;
 
   &:hover {
     background: #e6f0ff;
     transform: scale(1.05);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   }
 
   &:disabled {
@@ -60,6 +75,10 @@
     cursor: not-allowed;
     box-shadow: none;
     transform: none;
+  }
+
+  &:last-child {
+    border-right: none;
   }
 }
 
@@ -70,18 +89,32 @@
 }
 
 .rankingBtn {
-  margin: 2rem auto;
-  display: block;
+  margin: 2rem auto 0;
+  display: inline-block;
   background: #007bff;
   color: #fff;
-  padding: 14px 20px;
-  border-radius: 8px;
+  padding: 14px 24px;
+  border-radius: 12px;
   font-weight: 600;
   font-size: 1.2rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 
   &:hover {
     background: #0056b3;
+    transform: translateY(-2px);
+  }
+}
+
+/* Large screens */
+@media (min-width: 1024px) {
+  .category {
+    font-size: 1.6rem;
+    padding: 20px 0;
+  }
+
+  .cell {
+    font-size: 2.2rem;
+    padding: 40px 0;
   }
 }

@@ -1,7 +1,7 @@
-// Navbar.jsx
 import { useNavigate } from "react-router-dom";
 import { getUser, logOut } from "../../utilities/users-service";
 import styles from "./Navbar.module.scss";
+import logo from "../../assets/Logo.png";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -15,6 +15,7 @@ export default function Navbar() {
   return (
     <nav className={styles.navbar}>
       <div className={styles["nav-left"]}>
+        <img src={logo} alt="Logo" className={styles.logo} onClick={() => navigate("/")} />
         <button onClick={() => navigate("/")}>Home</button>
         <button onClick={() => navigate("/competition/start")}>Start Game</button>
         <button onClick={() => navigate("/jeopardy/create")}>Create Jeopardy</button>

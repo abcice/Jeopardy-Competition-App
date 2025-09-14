@@ -19,97 +19,81 @@
     font-weight: bold;
     margin-bottom: 1em;
 
-    &.success {
-      color: #28a745;
-    }
-
-    &.error {
-      color: #dc3545;
-    }
+    &.success { color: #28a745; }
+    &.error { color: #dc3545; }
   }
 
+  // ===== CATEGORY SECTIONS =====
   .newCategory,
-  .selectCategory {
+  .selectCategory,
+  .editCategory {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5em;
-    align-items: center;
+    align-items: flex-start;
+    justify-content: center;
     margin-bottom: 1em;
 
-    input {
-      flex: 1;
-      padding: 0.5em;
+    input,
+    select {
+      flex: 1 1 250px;
+      min-width: 250px;
+      max-width: 400px;
+      padding: 0.5em 0.8em;
       border-radius: 6px;
       border: 1px solid #ccc;
       font-size: 0.95em;
+      height: 2.5em;
+      line-height: 1.2em;
     }
 
     button {
-      padding: 0.5em 1em;
+      padding: 0 1em;
+      height: 2.5em;
+      line-height: 1.2em;
       border-radius: 6px;
       border: none;
-      cursor: pointer;
       font-weight: bold;
-      background-color: #007bff;
-      color: #fff;
+      cursor: pointer;
       transition: all 0.2s ease;
 
-      &:hover {
-        background-color: #0069d9;
+      &:first-of-type {
+        background-color: #28a745;
+        color: #fff;
+        &:hover { background-color: #218838; }
+        &:active { background-color: #1e7e34; }
       }
 
-      &:active {
-        background-color: #005cbf;
-      }
-    }
-  }
-
-  .editCategory {
-  display: flex;
-  gap: 0.5em;
-  margin-top: 0.5em;
-  flex-wrap: wrap;
-
-  input {
-    flex: 1 1 300px; // grow, shrink, base width
-    min-width: 250px; // prevent it from being too small
-    padding: 0.6em 0.8em;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 1em;
-  }
-
-  button {
-    padding: 0.5em 0.8em;
-    border-radius: 6px;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:first-of-type {
-      background-color: #28a745; // save name
-      color: #fff;
-      &:hover {
-        background-color: #218838;
-      }
-      &:active {
-        background-color: #1e7e34;
+      &:last-of-type {
+        background-color: #dc3545;
+        color: #fff;
+        &:hover { background-color: #c82333; }
+        &:active { background-color: #a71d2a; }
       }
     }
 
-    &:last-of-type {
-      background-color: #dc3545; // delete category
-      color: #fff;
-      &:hover {
-        background-color: #c82333;
-      }
-      &:active {
-        background-color: #a71d2a;
-      }
+    label {
+      flex-basis: 100%;
+      text-align: center;
+      margin-bottom: 0.25em;
     }
   }
+.newCategory button {
+  background-color: #3399ff !important; /* softer blue */
+  color: #fff !important;
 }
 
+.newCategory button:hover {
+  background-color: #287acc !important; /* slightly darker on hover */
+}
+
+.newCategory button:active {
+  background-color: #1f5fa3 !important; /* darkest on click */
+}
+
+
+
+  // ===== QUESTIONS =====
   .questions {
     margin-top: 1.5em;
 
@@ -121,8 +105,7 @@
       background-color: #f9f9f9;
 
       h3 {
-        margin-top: 0;
-        margin-bottom: 0.5em;
+        margin: 0 0 0.5em 0;
         font-size: 1.1em;
         color: #333;
       }
@@ -171,21 +154,18 @@
         font-weight: bold;
         transition: all 0.2s ease;
 
-        &:hover {
-          background-color: #c82333;
-        }
-        &:active {
-          background-color: #a71d2a;
-        }
+        &:hover { background-color: #c82333; }
+        &:active { background-color: #a71d2a; }
       }
     }
   }
 
+  // ===== ACTIONS =====
   .actions {
     display: flex;
-    gap: 0.5em;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    gap: 0.5em;
+    justify-content: center;
     margin-top: 1.5em;
 
     button {
@@ -199,13 +179,8 @@
       &.goDashboard {
         background-color: #17a2b8;
         color: #fff;
-
-        &:hover {
-          background-color: #138496;
-        }
-        &:active {
-          background-color: #117a8b;
-        }
+        &:hover { background-color: #138496; }
+        &:active { background-color: #117a8b; }
       }
     }
   }

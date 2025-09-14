@@ -5,7 +5,7 @@ import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import * as competitionApi from "../../../utilities/competition-api";
 import socket from "../../../utilities/socket";
-import styles from "./GamePage.module.scss";
+import styles from "./InstructorGamePage.module.scss";
 
 export default function InstructorGamePage() {
   const { id: competitionId } = useParams();
@@ -90,22 +90,24 @@ export default function InstructorGamePage() {
         {message && <p className={styles.message}>{message}</p>}
 
         <p>Share this code with players:</p>
-        <code>{competition.joinCode}</code>
+        <div className={styles.joinCodeCard}>{competition.joinCode}</div>
 
         <h2>Teams</h2>
         <ul>
-          {teams.map((t) => (
-            <li key={t._id}>
-              {t.name || "Unnamed"} –{" "}
-              {competition.identifierType === "colors"
-                ? t.color
-                : `#${t.number}`}{" "}
-              ({t.members?.length > 0 ? "✅ joined" : "❌ empty"})
-            </li>
-          ))}
-        </ul>
+        {teams.map((t) => (
+          <li key={t._id}>
+            {t.name || "Unnamed"} –{" "}
+            {competition.identifierType === "colors" ? t.color : `#${t.number}`}
+            <div className="status">
+              <div className={`dot ${t.members?.length > 0 ? "joined" : "empty"}`}></div>
+              {t.members?.length > 0 ? "Joined" : "Empty"}
+            </div>
+          </li>
+        ))}
+      </ul>
 
-        <p>
+
+        <p className={styles.waitingCounter}>
           Waiting for players... ({joinedCount}/{teams.length})
         </p>
       </main>

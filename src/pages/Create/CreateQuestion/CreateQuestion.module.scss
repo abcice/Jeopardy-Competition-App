@@ -1,53 +1,174 @@
 .createQuestion {
-  max-width: 700px;
+  width: 90%;
+  max-width: 1200px;
   margin: 2em auto;
-  padding: 2em;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 2em 2.5em;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  font-family: 'Inter', sans-serif;
 
   h1 {
     text-align: center;
+    font-size: 2.2em;
+    margin-bottom: 1.5em;
+    color: #222;
   }
 
   label {
-    font-weight: bold;
-    margin-top: 1em;
     display: block;
+    font-weight: 600;
+    font-size: 1.15em;
+    margin-bottom: 0.5em; // now sits directly above input/textarea
+    color: #333;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 0.85em 1em;
+    font-size: 1.15em;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    transition: border 0.2s;
+    &:focus {
+      border-color: #3399ff;
+      outline: none;
+      box-shadow: 0 0 6px rgba(51, 153, 255, 0.3);
+    }
+  }
+
+  textarea {
+    min-height: 200px;
+    max-height: 500px;
+    resize: vertical;
   }
 
   .questionBlock {
-    margin: 1em 0;
-    padding: 1em;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #fafafa;
+    margin: 2em 0;
+    padding: 1.8em;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: #f9f9f9;
+    transition: transform 0.15s;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    @media (min-width: 900px) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.8em;
+      align-items: start;
+
+      .preview,
+      .importButton {
+        grid-column: span 2;
+      }
+    }
+
+    h3 {
+      grid-column: span 2;
+      margin-bottom: 0.8em;
+      color: #444;
+    }
+
+    label input[type="checkbox"] {
+      margin-left: 0.6em;
+      transform: scale(1.3);
+      vertical-align: middle;
+    }
   }
 
   .preview {
-    margin-top: 0.5em;
-    padding: 0.5em;
-    background: #f0f0f0;
-    border-radius: 6px;
+    margin-top: 0.75em;
+    padding: 0.85em;
+    background: #f0f4f8;
+    border-radius: 8px;
+    font-size: 1em;
+    line-height: 1.45;
+    color: #333;
   }
 
   .actions {
     display: flex;
-    justify-content: space-between;
-    margin-top: 1em;
+    justify-content: center;
+    gap: 1.5em;
+    margin-top: 2.5em;
   }
 
   .importButton {
-    background: #007bff;
+    background: #ffa500; // changed to orange to differentiate from Save
     color: #fff;
-    margin-top: 0.5em;
+    margin-top: 0.7em;
+    padding: 0.75em 1.5em;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-size: 1.1em;
+    transition: background 0.2s, transform 0.1s;
+    &:hover {
+      background-color: #e69500;
+      transform: translateY(-1px);
+    }
   }
 
   .finished {
     text-align: center;
 
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 1em;
+      color: #222;
+    }
+
     button {
       margin: 0.5em;
+      padding: 0.85em 1.7em;
+      font-size: 1.15em;
+      border-radius: 10px;
+      cursor: pointer;
+      border: none;
+      background: #3399ff; // Save buttons remain blue
+      color: #fff;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+      &:hover {
+        background: #2a80cc;
+        transform: translateY(-1px);
+      }
+    }
+  }
+}
+.questionBlock {
+  margin: 2em 0;
+  padding: 1.8em;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background-color: #f9f9f9;
+
+  h3 {
+    grid-column: span 2;
+    margin-bottom: 0.8em;
+    color: #444;
+  }
+
+  @media (min-width: 900px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.8em;
+    align-items: start;
+
+    /* make each input/textarea stack with label above */
+    label, input, textarea {
+      grid-column: span 2; 
+    }
+
+    .preview,
+    .importButton {
+      grid-column: span 2;
     }
   }
 }

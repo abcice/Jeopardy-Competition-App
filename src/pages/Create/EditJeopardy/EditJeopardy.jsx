@@ -65,15 +65,21 @@ setTimeout(() => setMessage(""), 3000); // clears after 3 seconds
     <>
       <Navbar />
       <main className={styles.editJeopardy}>
+        <div className={styles.header}>
+          <div className={styles.backWrapper}>
         <BackButton />
+        </div>
         <h2>Edit Jeopardy</h2>
+        </div>
         {message && <p className={styles.message}>{message}</p>}
 
         <div className={styles.jeopardyList}>
           {jeopardies.map((j) => (
             <div key={j._id} className={styles.jeopardyCard}>
+              <div className={styles.jeopardyInfo}>
               <h3>{j.title}</h3>
               <p>Categories: {j.categories.length}</p>
+              </div>
               <div className={styles.actions}>
                 <button
                  className={styles.editButton} onClick={() => handleEdit(j._id)}>

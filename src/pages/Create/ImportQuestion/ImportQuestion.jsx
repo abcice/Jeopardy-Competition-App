@@ -82,6 +82,7 @@ const handleImport = () => {
   };
   navigate(`/jeopardy/${jeopardyId}/create-question`, {
   state: {
+    fromImport: true,
     totalCategories: location.state?.totalCategories,  // keep full count
     currentCategoryIndex,                             // preserve current index
     questionsPerCategory,
@@ -98,7 +99,8 @@ const handleImport = () => {
       <Navbar />
       <div className={styles.importQuestion}>
         <h1>Import Question from Old Jeopardies</h1>
-
+        
+        <div className={styles.field}>
         <label>Select Jeopardy</label>
         <select
           value={selectedJeopardy?._id || ""}
@@ -117,6 +119,7 @@ const handleImport = () => {
             </option>
           ))}
         </select>
+        </div>
 
         {categories.length > 0 && (
           <>
@@ -179,10 +182,12 @@ const handleImport = () => {
           </>
         )}
 
-        <button onClick={handleImport} disabled={!selectedQuestion}>
+        <div className={styles.buttons}>
+        <button className={styles.primary} onClick={handleImport} disabled={!selectedQuestion}>
           Import Selected Question
         </button>
-        <button onClick={() => navigate(-1)}>Cancel</button>
+        <button className={styles.secondary} onClick={() => navigate(-1)}>Cancel</button>
+        </div>
       </div>
       <Footer />
     </>

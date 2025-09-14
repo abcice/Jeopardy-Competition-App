@@ -5,7 +5,8 @@ import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
 import * as playerCompetitionApi from "../../../utilities/player-competition-api";
 import socket from "../../../utilities/socket";
-import styles from "./GamePage.module.scss";
+import styles from "./PlayerGamePage.module.scss";
+import Header from "../../../components/Header/Header";
 
 export default function PlayerGamePage({ playerToken }) {
   const { id: competitionId } = useParams();
@@ -119,7 +120,7 @@ export default function PlayerGamePage({ playerToken }) {
 
   return (
     <div className={styles.gamePage}>
-      <Navbar />
+      <Header />
       <main>
         {joinedTeam ? (
           <p>

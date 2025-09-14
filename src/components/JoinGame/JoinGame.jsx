@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import socket from "../../utilities/socket"; // ✅ import socket
 import * as playerCompetitionApi from "../../utilities/player-competition-api";
+import styles from "./JoinGame.module.scss"
 
 const JoinGame = ({ setPlayerToken }) => {
   const navigate = useNavigate();
@@ -49,25 +50,26 @@ const JoinGame = ({ setPlayerToken }) => {
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "2rem auto", textAlign: "center" }}>
-      <h2>Join Competition</h2>
+    <div className={styles.joinGameCard}>
+      <h2 className={styles.title}>Join Competition</h2>
       {!competition ? (
-        <>
+        <div className={styles.fetchSection}>
           <input
             type="text"
             placeholder="Enter join code"
             value={joinCode}
             onChange={(e) => setJoinCode(e.target.value)}
-            style={{ padding: "0.5rem", fontSize: "1rem" }}
+            className={styles.input}
           />
-          <button onClick={handleFetchCompetition} style={{ marginLeft: "1rem" }}>
+          <button onClick={handleFetchCompetition} className={styles.button}>
             Fetch Competition
           </button>
-        </>
+        </div>
       ) : (
-        <>
+        <div className={styles.teamSection}>
           <h3>{competition.name}</h3>
           <p>Select your team:</p>
+          <div className={styles.teams}>
           {competition.teams.map((team) => (
             <div key={team._id}>
               <input
@@ -82,12 +84,13 @@ const JoinGame = ({ setPlayerToken }) => {
               </label>
             </div>
           ))}
-          <button onClick={handleJoinTeam} style={{ marginTop: "1rem" }}>
+          </div>
+          <button onClick={handleJoinTeam} className={styles.button}>
             Join Team
           </button>
-        </>
+        </div>
       )}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
     </div>
   );
 };

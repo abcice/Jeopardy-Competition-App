@@ -1,4 +1,8 @@
 .editJeopardy {
+  display: flex;
+  flex-direction: column;
+  min-height: 80vh;           // take most of the viewport
+  justify-content: flex-start; // align top by default
   max-width: 700px;
   margin: 2em auto;
   padding: 2em;
@@ -8,19 +12,15 @@
 
   h2 {
     text-align: center;
+    margin-bottom: 1rem;
   }
 
   .message {
     text-align: center;
     font-weight: bold;
 
-    &.success {
-      color: #28a745; // green for success
-    }
-
-    &.error {
-      color: #dc3545; // red for errors
-    }
+    &.success { color: #28a745; }
+    &.error { color: #dc3545; }
   }
 
   .jeopardyList {
@@ -28,23 +28,44 @@
     display: flex;
     flex-direction: column;
     gap: 1em;
+    flex: 1;                   // make list expand to fill vertical space
+    justify-content: flex-start;
 
     .jeopardyCard {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.8em;
+      padding: 1em;
       border: 1px solid #ddd;
       border-radius: 8px;
-      background-color: #fafafa; // light neutral background
+      background-color: #fafafa;
+      flex-wrap: wrap;
+      min-height: 70px;
+
+      .jeopardyInfo {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        max-width: 70%;
+        word-break: break-word;
+      }
 
       h3 {
         margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 0.3em 0 0 0;
+        color: #555;
+        font-size: 0.95rem;
       }
 
       .actions {
         display: flex;
         gap: 0.5em;
+        margin-top: 0.5em;
 
         button {
           padding: 0.5em 1em;
@@ -53,34 +74,41 @@
           cursor: pointer;
           font-weight: bold;
           transition: all 0.2s ease;
+          white-space: nowrap;
 
           &.deleteButton {
             background-color: #dc3545;
             color: #fff;
-
-            &:hover {
-              background-color: #c82333;
-            }
-
-            &:active {
-              background-color: #a71d2a;
-            }
+            &:hover { background-color: #c82333; }
+            &:active { background-color: #a71d2a; }
           }
 
           &.editButton {
             background-color: #007bff;
             color: #fff;
-
-            &:hover {
-              background-color: #0069d9;
-            }
-
-            &:active {
-              background-color: #005cbf;
-            }
+            &:hover { background-color: #0069d9; }
+            &:active { background-color: #005cbf; }
           }
         }
       }
     }
+  }
+}
+.header {
+  position: relative;      // to allow absolute positioning
+  margin-bottom: 1.5rem;
+  text-align: center;      // title will be centered
+
+  h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+
+  .backWrapper {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
   }
 }

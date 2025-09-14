@@ -1,5 +1,5 @@
 // src/pages/Competition/QuestionPage/PlayerQuestionPage.jsx
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate  } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
@@ -8,6 +8,7 @@ import socket from "../../../utilities/socket";
 import styles from "./QuestionPage.module.scss";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
 import BuzzButton from "../../../components/BuzzButton/BuzzButton";
+import JeopardyTheme from "../../../assets/Jeopardy-Theme.mp3"
 
 
 export default function PlayerQuestionPage() {
@@ -20,6 +21,9 @@ export default function PlayerQuestionPage() {
   const [joinedTeamId, setJoinedTeamId] = useState(null);
   const [buzzersEnabled, setBuzzersEnabled] = useState(false);
   const [showRanking, setShowRanking] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+    const audioRef = useRef(null);
+  
 
 
 
@@ -162,6 +166,20 @@ export default function PlayerQuestionPage() {
   return (
     <>
       <Navbar />
+      <audio ref={audioRef} src={JeopardyTheme} loop autoPlay />
+            <div className={styles.muteButtonContainer}>
+              <button
+                className={styles.muteButton}
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.muted = !audioRef.current.muted;
+                    setIsMuted(audioRef.current.muted);
+                  }
+                }}
+              >
+                {isMuted ? "Unmute 🎵" : "Mute 🔇"}
+              </button>
+            </div>
       <main className={styles["question-page"]}>
         <h2>
           {currentQuestion.category.name} - {currentQuestion.points}
@@ -170,12 +188,15 @@ export default function PlayerQuestionPage() {
           <MarkdownRenderer content={currentQuestion.text} />
         </div>
 
-        <BuzzButton
-          team={myTeam}
-          identifierType="colors"
-          onBuzz={handleBuzz}
-          disabled={!buzzersEnabled || !!teamAnswering}
-        />
+        <div className={styles.buzzersContainer}>
+          <BuzzButton
+            team={myTeam}
+            identifierType="colors"
+            onBuzz={handleBuzz}
+            disabled={!buzzersEnabled || !!teamAnswering}
+          />
+        </div>
+
 
 
         {teamAnswering && <p>Team answering: {teamAnswering.name}</p>}

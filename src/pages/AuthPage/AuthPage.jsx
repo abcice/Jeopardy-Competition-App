@@ -1,28 +1,47 @@
-// src/pages/AuthPage/AuthPage.jsx
 import { useState } from "react";
 import styles from "./AuthPage.module.scss";
 import LoginForm from "../../components/LoginForm/LoginForm";
 import SignUpForm from "../../components/SignUpForm/SignUpForm";
 import JoinGame from "../../components/JoinGame/JoinGame";
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
 
 export default function AuthPage({ setUser, setPlayerToken }) {
-  const [showLogin, setShowLogin] = useState(true);
+  const [activeTab, setActiveTab] = useState("login"); // 'login' or 'signup'
 
   return (
-    <main className={styles.AuthPage}>
-      <div>
-        <h3 onClick={() => setShowLogin(!showLogin)}>
-          {showLogin ? "SIGN UP" : "LOG IN"}
-        </h3>
-      </div>
-      <div className={styles.formsContainer}>
-        <div className={styles.authForms}>
-          {showLogin ? <LoginForm setUser={setUser} /> : <SignUpForm setUser={setUser} />}
+    <>
+      <Header />
+      <main className={styles.AuthPage}>
+        <div className={styles.tabToggle}>
+          <span
+            className={activeTab === "login" ? styles.active : ""}
+            onClick={() => setActiveTab("login")}
+          >
+            LOG IN
+          </span>
+          <span
+            className={activeTab === "signup" ? styles.active : ""}
+            onClick={() => setActiveTab("signup")}
+          >
+            SIGN UP
+          </span>
         </div>
-        <div className={styles.joinGameSection}>
-          <JoinGame setPlayerToken={setPlayerToken} />
+
+        <div className={styles.formsContainer}>
+          <div className={styles.authForms}>
+            {activeTab === "login" ? (
+              <LoginForm setUser={setUser} />
+            ) : (
+              <SignUpForm setUser={setUser} />
+            )}
+          </div>
+          <div className={styles.joinGameSection}>
+            <JoinGame setPlayerToken={setPlayerToken} />
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+      <Footer />
+    </>
   );
 }

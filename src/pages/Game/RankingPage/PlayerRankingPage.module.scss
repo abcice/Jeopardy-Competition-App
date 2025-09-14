@@ -19,3 +19,24 @@
   color: gold;
   margin-bottom: 15px;
 }
+.teamItem {
+  // existing styles...
+
+  &.myTeam {
+    background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+    border: 2px solid #00acc1;
+    font-weight: 700;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 172, 193, 0.4);
+  }
+
+  &.winnerGlow {
+    background: linear-gradient(135deg, #ffd700, #ffea00, #fff176);
+    color: #222;
+    border: none;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.7),
+      0 0 15px rgba(255, 255, 255, 0.3) inset;
+    transform: scale(1.05);
+    animation: winnerPulse 2s infinite ease-in-out;
+  }
+}

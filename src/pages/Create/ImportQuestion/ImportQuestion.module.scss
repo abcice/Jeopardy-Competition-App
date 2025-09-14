@@ -11,25 +11,66 @@
     margin-bottom: 1em;
   }
 
-  label {
-    font-weight: bold;
-    display: block;
-    margin-top: 1em;
-  }
+  .field {
+    margin: 1.2em 0;
 
-  select {
-    width: 100%;
-    margin-bottom: 1em;
+    label {
+      display: block;
+      margin-bottom: 0.4em;
+      font-size: 1.05em;
+      font-weight: 600;
+      color: #333;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.6em;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
   }
 
   .preview {
-    padding: 0.5em;
-    background: #f0f0f0;
-    border-radius: 6px;
-    margin-top: 0.5em;
+    padding: 1em;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-top: 1em;
+    line-height: 1.5;
+
+    strong {
+      color: #1f2937;
+      display: inline-block;
+      min-width: 100px;
+    }
   }
 
-  button {
-    margin-top: 1em;
+  .buttons {
+    margin-top: 1.5em;
+
+    button {
+      padding: 0.75em 1.5em;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      margin-right: 0.6em;
+
+      &.primary {
+        background: #3b82f6; // blue
+        color: #fff;
+      }
+
+      &.secondary {
+        background: #e5e7eb; // gray
+        color: #111;
+      }
+
+      &:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+      }
+    }
   }
 }

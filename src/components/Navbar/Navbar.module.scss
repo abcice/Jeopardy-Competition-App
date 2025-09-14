@@ -1,63 +1,92 @@
-/* Navbar.module.scss */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.8rem 1.5rem;
-  background-color: #1a1a1a;
-  color: white;
+  padding: 0.8rem 2rem;
+  background: #f8f9fa; /* navbar base */
+  color: #222;
   font-weight: bold;
-
-  button {
-    margin-right: 1rem;
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  transition: all 0.3s ease;
 
   .nav-left, .nav-right {
     display: flex;
     align-items: center;
+    gap: 1rem;
+  }
+
+  .logo {
+    height: 50px;
+    margin-right: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.15));
+    }
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-size: 0.95rem;
+    letter-spacing: 0.4px;
+
+    /* flat style: blend with navbar */
+    background: transparent;
+    color: #3457d5; /* subtle text color from logo */
+    border: none;
+    box-shadow: none;
+
+    &:hover {
+      color: #1f2a44; /* slightly darker on hover */
+      transform: translateY(-1px);
+      text-decoration: underline; /* subtle hover feedback */
+    }
   }
 
   .logout-button {
-    background-color: #ff4d4f;
-    padding: 0.3rem 0.7rem;
-    border-radius: 4px;
-    color: white;
-    font-weight: bold;
-    margin-left: 1rem;
+    background: transparent;
+    color: #d9534f; /* red from logo */
+    border: none;
+    padding: 0.4rem 0.9rem;
+
     &:hover {
-      background-color: #ff7875;
+      color: #b73c3c;
+      transform: translateY(-1px);
+      text-decoration: underline;
     }
   }
 
   .user-name {
     margin-left: 1rem;
+    color: #1f2a44;
+    font-weight: 600;
   }
-}
 
-/* Footer.module.scss */
-.footer {
-  background-color: #f8f8f8;
-  padding: 1rem 1.5rem;
-  color: #333;
-  text-align: center;
-  margin-top: auto; /* pushes footer to bottom if content is short */
-}
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
 
-.separator {
-  border: none;
-  border-top: 2px solid #ccc;
-  margin-bottom: 1rem;
-}
+    .nav-left, .nav-right {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
 
-.footer-content {
-  p {
-    margin: 0.3rem 0;
+    .logo {
+      margin-bottom: 0.5rem;
+    }
+
+    button {
+      width: 100%;
+      text-align: center;
+    }
   }
 }

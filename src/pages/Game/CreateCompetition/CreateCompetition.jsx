@@ -30,9 +30,19 @@ const location = useLocation();
 
 
   // Predefined colors
-  const availableColors = [
-    'red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'teal'
-  ];
+const availableColors = [
+  '#ef4444', // soft red
+  '#3b82f6', // soft blue
+  '#16a34a', // medium green (darker than cyan)
+  '#f59e0b', // amber/orange
+  '#8b5cf6', // soft violet (distinct from purple/pink)
+  '#f472b6', // pink (distinct from red & violet)
+  '#ea580c', // tangerine (darker than amber)
+  '#06b6d4', // teal/cyan (clear and different from green & blue)
+];
+
+
+
 
 const handleGenerateTeams = () => {
   if (!selectedJeopardy) {
@@ -49,7 +59,7 @@ const handleGenerateTeams = () => {
   for (let i = 0; i < numTeams; i++) {
     generatedTeams.push({
       name: `Team ${i + 1}`,
-      color: identifierType === "colors" ? availableColors[i % availableColors.length] : null,
+      color: availableColors[i % availableColors.length],
       number: identifierType === "numbers" ? i + 1 : null,
       members: [], // initialize members
     });
@@ -104,79 +114,62 @@ useEffect(() => {
 
 
   return (
-    <div className={styles.gamePage}>
-        <Navbar />
-        <main>
-      <h1>Setup Competition</h1>
+    <>
+  <Navbar />
+  <div className={styles.gamePage}>
+    <div className={styles.card}>
+      <main>
+        <h1>Setup Competition</h1>
+        {message && <p className={styles.message}>{message}</p>}
 
-      {message && <p className={styles.message}>{message}</p>}
-      <label>Select Jeopardy Game</label>
-      <select
-        value={selectedJeopardy}
-        onChange={(e) => setSelectedJeopardy(e.target.value)}
-      >
-        <option value="">-- Choose a Jeopardy --</option>
-        {jeopardies.map((j) => (
-          <option key={j._id} value={j._id}>
-            {j.title}
-          </option>
-        ))}
-      </select>
-
-
-      <div className={styles.controls}>
-        
-        <label>How many teams?</label>
-        <input
-          type="number"
-          min="1"
-          value={numTeams}
-          onChange={(e) => setNumTeams(Number(e.target.value))}
-        />
-
-        <label>Identify the team by</label>
-        <select
-          value={identifierType}
-          onChange={(e) => setIdentifierType(e.target.value)}
-        >
-          <option value="colors">Colors</option>
-          <option value="numbers">Numbers</option>
+        <label>Select Jeopardy Game</label>
+        <select value={selectedJeopardy} onChange={(e) => setSelectedJeopardy(e.target.value)}>
+          <option value="">-- Choose a Jeopardy --</option>
+          {jeopardies.map(j => <option key={j._id} value={j._id}>{j.title}</option>)}
         </select>
 
-        <button onClick={handleGenerateTeams}>Generate Teams</button>
-      </div>
-      {competitionId && joinCode && (
-        <div className={styles.joinCode}>
-          <p>Share this code with players:</p>
-          <code>{joinCode}</code>
+        <div className={styles.controls}>
+          <div className={styles.controlItem}>
+          <label>How many teams?</label>
+          <input type="number" min="1" value={numTeams} onChange={(e) => setNumTeams(Number(e.target.value))} />
+          </div>
+
+          <div className={styles.controlItem}>
+          <label>Identify the team by</label>
+          <select value={identifierType} onChange={(e) => setIdentifierType(e.target.value)}>
+            <option value="colors">Colors</option>
+            <option value="numbers">Numbers</option>
+          </select>
+          </div>
+
         </div>
-      )}
+          <button className={styles.generateButton} onClick={handleGenerateTeams}>Generate Teams</button>
+
+        {teams.length > 0 && (
+          <div className={styles.teamsPreview}>
+            <h2>Teams Preview</h2>
+            <ul>
+              {teams.map((team, idx) => (
+                <li key={idx} style={{ color: team.color }}>
+                  {team.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
 
-      {teams.length > 0 && (
-        <div className={styles.teamsPreview}>
-          <h2>Teams Preview</h2>
-          <ul>
-            {teams.map((team, idx) => (
-              <li key={idx} style={{ color: team.color || 'inherit' }}>
-                {team.name} — {team.color || `#${team.number}`}
-              </li>
-            ))}
-          </ul>
+        <div className={styles.actions}>
+          <BackButton />
+          <NextButton onClick={handleSaveTeams} to={null} />
         </div>
-      )}
 
-      <div className={styles.actions}>
-        <BackButton />
-        <NextButton
-          onClick={handleSaveTeams}
-          to={null} // navigation handled inside handleSaveTeams
-        />
-      </div>
-
-      {loading && <p>⏳ Saving...</p>}
+        {loading && <p>⏳ Saving...</p>}
       </main>
-      <Footer />
     </div>
+  </div>
+  <Footer />
+</>
+
   );
 }

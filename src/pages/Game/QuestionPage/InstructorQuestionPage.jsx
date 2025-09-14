@@ -1,5 +1,5 @@
 // src/pages/Competition/QuestionPage/InstructorQuestionPage.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef  } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Footer from "../../../components/Footer/Footer";
@@ -10,6 +10,7 @@ import DailyDouble from "./DailyDouble/DailyDouble";
 import RankingContent from "../RankingPage/RankingContent";
 import MarkdownRenderer from "../../../components/MarkdownRenderer/MarkdownRenderer";
 import BuzzButton from "../../../components/BuzzButton/BuzzButton";
+import JeopardyTheme from "../../../assets/Jeopardy-Theme.mp3"
 
 export default function InstructorQuestionPage() {
   const { competitionId } = useParams();
@@ -27,6 +28,9 @@ export default function InstructorQuestionPage() {
   const [lastQuestionId, setLastQuestionId] = useState(null);
   const [readyToGoBack, setReadyToGoBack] = useState(false);
   const [message, setMessage] = useState("");
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef(null);
+
 
   const fetchCompetition = async () => {
     try {
@@ -205,6 +209,21 @@ await competitionApi.markCorrect(competitionId, teamAnswering._id, bidToSend);
   return (
     <>
       <Navbar />
+      <audio ref={audioRef} src={JeopardyTheme} loop autoPlay />
+      <div className={styles.muteButtonContainer}>
+        <button
+          className={styles.muteButton}
+          onClick={() => {
+            if (audioRef.current) {
+              audioRef.current.muted = !audioRef.current.muted;
+              setIsMuted(audioRef.current.muted);
+            }
+          }}
+        >
+          {isMuted ? "Unmute 🎵" : "Mute 🔇"}
+        </button>
+      </div>
+
       <main className={styles["question-page"]}>
         <h2>{currentQuestion.category.name} - {currentQuestion.points}</h2>
         <div className={styles.questionText}>

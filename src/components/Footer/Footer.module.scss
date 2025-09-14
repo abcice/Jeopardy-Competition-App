@@ -1,25 +1,33 @@
 .footer {
   background: #1f2937;
   color: #f9fafb;
-  padding: 1.5rem;
-  margin-top: auto;
-
-  .separator {
-    border: 0;
-    height: 1px;
-    background: #374151;
-    margin-bottom: 1rem;
-  }
+  padding: 0.8rem 1rem; /* smaller vertical padding */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
   .footer-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 0.9rem;
     text-align: center;
+    font-size: 0.85rem;
+    gap: 0.3rem; /* tighter spacing */
   }
 
   .about {
-    margin-bottom: 0.5rem;
+    margin: 0;
+    line-height: 1.3; /* compact line-height */
+  }
+
+  .copyright {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    .about {
+      line-height: 1.2;
+    }
   }
 }

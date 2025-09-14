@@ -1,11 +1,13 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import * as playerApi from "../../../utilities/player-competition-api";
 import styles from "./RankingPage.module.scss";
+import Confetti from "react-confetti";
 
 export default function PlayerRankingContent({ playerToken: propToken }) {
   const [competition, setCompetition] = useState(null);
   const [loading, setLoading] = useState(true);
   const [gameFinished, setGameFinished] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // --- Token handling ---
   const storedToken = localStorage.getItem("playerToken");
@@ -30,7 +32,9 @@ export default function PlayerRankingContent({ playerToken: propToken }) {
           (acc, cat) => acc + cat.questions.length,
           0
         );
-        setGameFinished(res.competition.answeredQuestions.length === totalQuestions);
+        setGameFinished(
+          res.competition.answeredQuestions.length === totalQuestions
+        );
       } catch (err) {
         console.error("Failed to fetch competition:", err);
       } finally {
@@ -43,6 +47,21 @@ export default function PlayerRankingContent({ playerToken: propToken }) {
     return () => clearInterval(interval);
   }, [competitionId, token]);
 
+  // --- Trigger confetti only when the game finishes ---
+  useEffect(() => {
+    if (gameFinished && competition) {
+      const sortedTeams = [...competition.teams].sort(
+        (a, b) => b.score - a.score
+      );
+      const winnerTeam = sortedTeams[0];
+      if (winnerTeam) {
+        setShowConfetti(true);
+        const timer = setTimeout(() => setShowConfetti(false), 6000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [gameFinished, competition]);
+
   if (loading) return <p>Loading rankings...</p>;
   if (!competition) return <p>❌ Competition not found</p>;
 
@@ -51,7 +70,13 @@ export default function PlayerRankingContent({ playerToken: propToken }) {
   const winnerTeam = gameFinished ? sortedTeams[0] : null;
 
   return (
-    <div className={`${styles["ranking-page"]} ${gameFinished ? styles.finished : ""}`}>
+    <div
+      className={`${styles["ranking-page"]} ${
+        gameFinished ? styles.finished : ""
+      }`}
+    >
+      {showConfetti && <Confetti />}
+
       <h2>{gameFinished ? "🏆 Game Over! Winner:" : "Current Rankings"}</h2>
 
       {gameFinished && winnerTeam && (
@@ -64,9 +89,9 @@ export default function PlayerRankingContent({ playerToken: propToken }) {
         {sortedTeams.map((team, idx) => (
           <li
             key={team._id}
-            className={`${styles.teamItem} ${
-              team._id === myTeamId ? styles.myTeam : ""
-            } ${gameFinished && idx === 0 ? styles.winnerGlow : ""}`}
+            className={`${styles.teamItem} 
+              ${team._id === myTeamId ? styles.myTeam : ""} 
+              ${gameFinished && idx === 0 ? styles.winnerGlow : ""}`}
           >
             <span className={styles.rank}>{idx + 1}.</span>
             <span className={styles.name}>{team.name}</span>
