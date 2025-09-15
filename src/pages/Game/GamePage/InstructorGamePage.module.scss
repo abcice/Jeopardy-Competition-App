@@ -138,7 +138,7 @@
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-  > main {
+   main {
     padding: 2rem 1rem;
     gap: 2rem;
   }
@@ -160,7 +160,7 @@
 
 /* Large screens */
 @media (min-width: 1024px) {
-  > main {
+   main {
     padding: 5rem 2rem;
   }
 
