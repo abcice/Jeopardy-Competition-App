@@ -1,9 +1,7 @@
 // ✅ src/utilities/socket.js
 import { io } from "socket.io-client";
-import dotenv from 'dotenv';
-dotenv.config()
 
-const socket = io(process.env.VITE_API_URL, {
+const socket = io(import.meta.env.VITE_API_URL || 'https://jeopardy-competition-app.onrender.com/', {
   autoConnect: false,
   withCredentials: true,
   transports: ["websocket"],
