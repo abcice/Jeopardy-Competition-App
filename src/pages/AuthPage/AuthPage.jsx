@@ -3,7 +3,7 @@ import styles from "./AuthPage.module.scss";
 import LoginForm from "../../components/LoginForm/LoginForm";
 import SignUpForm from "../../components/SignUpForm/SignUpForm";
 import JoinGame from "../../components/JoinGame/JoinGame";
-import Header from "../../components/Header/Header";
+import Header from "../../components/Header/AuthHeader";
 import Footer from "../../components/Footer/Footer";
 
 export default function AuthPage({ setUser, setPlayerToken }) {
