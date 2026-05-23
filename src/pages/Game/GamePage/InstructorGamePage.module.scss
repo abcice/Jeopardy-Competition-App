@@ -9,7 +9,7 @@
   color: #374151;
 
   /* Main content grows between navbar and footer */
-  > main {
+   main {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -20,7 +20,7 @@
     padding: 4rem 1rem;
   }
 
-  > footer {
+   footer {
     margin-top: auto;
   }
 
@@ -138,7 +138,7 @@
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-  > main {
+   main {
     padding: 2rem 1rem;
     gap: 2rem;
   }
@@ -160,7 +160,7 @@
 
 /* Large screens */
 @media (min-width: 1024px) {
-  > main {
+   main {
     padding: 5rem 2rem;
   }
 
